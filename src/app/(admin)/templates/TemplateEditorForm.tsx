@@ -14,7 +14,7 @@ const CATEGORIES = [
 ]
 
 type Props = {
-  action:      (formData: FormData) => Promise<unknown>
+  action:      (formData: FormData) => Promise<void>
   submitLabel: string
   cancelHref:  string
   extraButtons?: React.ReactNode
