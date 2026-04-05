@@ -24,3 +24,11 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* Force readable text in all form controls regardless of OS dark mode */
+input,
+textarea,
+select {
+  color: #18181b; /* zinc-900 */
+  background-color: #ffffff;
+}
