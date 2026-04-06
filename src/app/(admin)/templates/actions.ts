@@ -66,14 +66,8 @@ export async function sendTemplateTestMail(formData: FormData) {
 
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://nomadforlife-mailsystem.vercel.app'
 
-  // Verwijder de afmeldlink uit testmails (echte mails hebben een echte link)
-  const testHtmlBody = htmlBody.replace(
-    /<a\b[^>]*\{\{unsubscribe_url\}\}[^>]*>[\s\S]*?<\/a>/gi,
-    '',
-  )
-
   const { html, text } = renderEmail({
-    htmlBody:       testHtmlBody,
+    htmlBody:       htmlBody,
     textBody:       null,
     contact:        { first_name: 'Test', last_name: 'Gebruiker', email: TEST_TO },
     campaignName:   'Template preview',
