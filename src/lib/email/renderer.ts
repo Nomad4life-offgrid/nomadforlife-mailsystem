@@ -166,8 +166,8 @@ export function renderEmail(opts: {
   // Buttons: alle <a>-tags met background(-color) in hun style krijgen geforceerde
   // kernstijlen. De tekst wordt in een <span> gewikkeld zodat e-mailclients
   // (Gmail, Outlook) de linkkleur en underline niet kunnen overschrijven.
-  const BUTTON_CORE = 'background-color:#f85d1b;color:#ffffff;padding:9px 15px;border-radius:8px;display:inline-block;text-decoration:none'
-  const SPAN_STYLE  = 'color:#ffffff;text-decoration:none'
+  const BUTTON_CORE = 'background-color:#f85d1b;color:#ffffff;-webkit-text-fill-color:#ffffff;padding:9px 15px;border-radius:8px;display:inline-block;text-decoration:none'
+  const SPAN_STYLE  = 'color:#ffffff;-webkit-text-fill-color:#ffffff;text-decoration:none'
   const styledBody = bodyHtml.replace(
     /<a(\b[^>]*\bstyle="([^"]*)"[^>]*)>([\s\S]*?)<\/a>/gi,
     (match, _attrs, styleVal: string, content: string) => {
