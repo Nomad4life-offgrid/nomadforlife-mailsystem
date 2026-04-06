@@ -187,7 +187,12 @@ export function renderEmail(opts: {
     },
   )
 
-  const html = `<div style="background-color:#000000;color:#ffffff;text-align:left;padding:40px 0">${styledBody}</div>`
+  // Volledig HTML-document: geen wrapper toevoegen — de template heeft eigen <html>/<body>.
+  // Snippet-template: wikkel in een basis-div met zwarte achtergrond en padding.
+  const isFullDocument = /^\s*<!doctype\b|^\s*<html\b/i.test(styledBody)
+  const html = isFullDocument
+    ? styledBody
+    : `<div style="background-color:#000000;color:#ffffff;text-align:left;padding:40px 0">${styledBody}</div>`
   const rawText = opts.textBody ? opts.textBody : htmlToText(opts.htmlBody)
   const text    = substituteVars(rawText, vars) + (withFooter ? FOOTER_TEXT : '')
 
