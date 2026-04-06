@@ -164,20 +164,26 @@ export function renderEmail(opts: {
   const bodyHtml = substituteVars(opts.htmlBody, vars) + (withFooter ? FOOTER_HTML : '')
 
   // Buttons: alle <a>-tags met background(-color) in hun style krijgen geforceerde
-  // kernstijlen — wit, padding 9×15, radius 8. Inline = kan niet overreden worden.
-  const BUTTON_CORE = 'background-color:#f85d1b;color:#ffffff;padding:9px 15px;border-radius:8px;display:inline-block'
+  // kernstijlen. De tekst wordt in een <span> gewikkeld zodat e-mailclients
+  // (Gmail, Outlook) de linkkleur en underline niet kunnen overschrijven.
+  const BUTTON_CORE = 'background-color:#f85d1b;color:#ffffff;padding:9px 15px;border-radius:8px;display:inline-block;text-decoration:none'
+  const SPAN_STYLE  = 'color:#ffffff;text-decoration:none'
   const styledBody = bodyHtml.replace(
-    /<a(\b[^>]*\bstyle="([^"]*)"[^>]*)>/gi,
-    (match, _attrs, styleVal: string) => {
+    /<a(\b[^>]*\bstyle="([^"]*)"[^>]*)>([\s\S]*?)<\/a>/gi,
+    (match, _attrs, styleVal: string, content: string) => {
       if (!/background/i.test(styleVal)) return match
       const cleaned = styleVal
-        .replace(/\bbackground(-color)?\s*:[^;]+;?/gi, '')
-        .replace(/\bcolor\s*:[^;]+;?/gi,               '')
-        .replace(/\bpadding\s*:[^;]+;?/gi,             '')
-        .replace(/\bborder-radius\s*:[^;]+;?/gi,       '')
-        .replace(/\bdisplay\s*:[^;]+;?/gi,             '')
+        .replace(/\bbackground(-color)?\s*:[^;]+;?/gi,  '')
+        .replace(/\bcolor\s*:[^;]+;?/gi,                '')
+        .replace(/\bpadding\s*:[^;]+;?/gi,              '')
+        .replace(/\bborder-radius\s*:[^;]+;?/gi,        '')
+        .replace(/\bdisplay\s*:[^;]+;?/gi,              '')
+        .replace(/\btext-decoration\s*:[^;]+;?/gi,      '')
         .replace(/\s{2,}/g, ' ').trim().replace(/;$/, '')
-      return match.replace(/style="[^"]*"/, `style="${cleaned};${BUTTON_CORE}"`)
+      const newStyle = `${cleaned ? cleaned + ';' : ''}${BUTTON_CORE}`
+      const openTag  = match.replace(/style="[^"]*"/, `style="${newStyle}"`)
+        .replace(/>[\s\S]*$/, '>')
+      return `${openTag}<span style="${SPAN_STYLE}">${content}</span></a>`
     },
   )
 
