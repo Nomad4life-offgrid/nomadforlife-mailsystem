@@ -12,7 +12,7 @@ export default async function SendPage({
   const supabase     = await createClient()
 
   const [{ data: campaigns }, { data: groups }] = await Promise.all([
-    supabase.from('campaigns').select('id, name').eq('status', 'active').is('deleted_at', null).order('name'),
+    supabase.from('campaigns').select('id, name, status, campaign_type').in('status', ['active', 'ready', 'sending', 'scheduled']).is('deleted_at', null).order('name'),
     supabase.from('contact_groups').select('id, name, color').order('name'),
   ])
 
