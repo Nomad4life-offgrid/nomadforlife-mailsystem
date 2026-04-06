@@ -162,7 +162,25 @@ export function renderEmail(opts: {
   const FOOTER_TEXT = `\n\n--\nTeam Nomad For Life\nhttps://nomad4life.com`
 
   const bodyHtml = substituteVars(opts.htmlBody, vars) + (withFooter ? FOOTER_HTML : '')
-  const html = `<div style="text-align:left;padding:40px 0">${bodyHtml}</div>`
+
+  // Buttons: alle <a>-tags met background(-color) in hun style krijgen geforceerde
+  // kernstijlen — wit, padding 9×15, radius 8. Inline = kan niet overreden worden.
+  const BUTTON_CORE = 'color:#ffffff;padding:9px 15px;border-radius:8px;display:inline-block'
+  const styledBody = bodyHtml.replace(
+    /<a(\b[^>]*\bstyle="([^"]*)"[^>]*)>/gi,
+    (match, _attrs, styleVal: string) => {
+      if (!/background/i.test(styleVal)) return match
+      const cleaned = styleVal
+        .replace(/\bcolor\s*:[^;]+;?/gi,         '')
+        .replace(/\bpadding\s*:[^;]+;?/gi,        '')
+        .replace(/\bborder-radius\s*:[^;]+;?/gi,  '')
+        .replace(/\bdisplay\s*:[^;]+;?/gi,        '')
+        .replace(/\s{2,}/g, ' ').trim().replace(/;$/, '')
+      return match.replace(/style="[^"]*"/, `style="${cleaned};${BUTTON_CORE}"`)
+    },
+  )
+
+  const html = `<div style="text-align:left;padding:40px 0">${styledBody}</div>`
   const rawText = opts.textBody ? opts.textBody : htmlToText(opts.htmlBody)
   const text    = substituteVars(rawText, vars) + (withFooter ? FOOTER_TEXT : '')
 
