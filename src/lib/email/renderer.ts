@@ -187,7 +187,7 @@ export function renderEmail(opts: {
     },
   )
 
-  const html = `<div style="text-align:left;padding:40px 0">${styledBody}</div>`
+  const html = `<div style="background-color:#000000;color:#ffffff;text-align:left;padding:40px 0">${styledBody}</div>`
   const rawText = opts.textBody ? opts.textBody : htmlToText(opts.htmlBody)
   const text    = substituteVars(rawText, vars) + (withFooter ? FOOTER_TEXT : '')
 
