@@ -68,7 +68,8 @@ export async function createCampaign(
     return { message: error.message }
   }
 
-  redirect(`/campaigns/${data.id}`)
+  revalidatePath('/campaigns')
+  redirect(`/campaigns/${data.id}?info=${encodeURIComponent('Campagne aangemaakt als concept.')}`)
 }
 
 // ── UPDATE ────────────────────────────────────────────────────────────────────
