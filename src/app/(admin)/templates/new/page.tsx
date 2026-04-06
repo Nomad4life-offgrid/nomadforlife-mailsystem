@@ -4,7 +4,13 @@ import { TemplateEditorForm } from '../TemplateEditorForm'
 
 export const metadata = { title: 'Nieuwe template' }
 
-export default function NewTemplatePage() {
+export default async function NewTemplatePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ error?: string }>
+}) {
+  const { error } = await searchParams
+
   return (
     <div className="p-8 max-w-3xl">
       <div className="mb-6">
@@ -13,6 +19,12 @@ export default function NewTemplatePage() {
         </Link>
         <h1 className="mt-3 text-2xl font-semibold text-zinc-900">Nieuwe template</h1>
       </div>
+
+      {error && (
+        <div className="mb-4 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          {decodeURIComponent(error)}
+        </div>
+      )}
 
       <TemplateEditorForm
         action={createTemplate}

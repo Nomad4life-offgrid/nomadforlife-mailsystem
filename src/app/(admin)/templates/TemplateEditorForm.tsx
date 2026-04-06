@@ -138,6 +138,9 @@ export function TemplateEditorForm({ action, submitLabel, cancelHref, extraButto
             onChange={e => setHtmlBody(e.target.value)}
             className="block w-full rounded-md border border-zinc-300 px-3 py-2 font-mono text-sm focus:border-zinc-500 focus:outline-none"
           />
+          <p className="mt-1.5 text-xs text-amber-700 font-medium">
+            Verplicht: voeg <code className="bg-amber-50 px-1 rounded font-mono">{'{{unsubscribe_url}}'}</code> toe als href van je afmeldlink.
+          </p>
         </div>
 
         <div>

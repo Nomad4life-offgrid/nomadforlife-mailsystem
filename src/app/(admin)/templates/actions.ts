@@ -6,15 +6,15 @@ import { createServiceClient } from '@/lib/supabase/service'
 import { validateTemplateHtml } from '@/lib/email/renderer'
 import { requireAdmin, requireEditor } from '@/lib/auth/guards'
 
-function requireUnsubscribeLink(html: string) {
-  const errors = validateTemplateHtml(html)
-  if (errors.length > 0) throw new Error(errors[0])
-}
 
 export async function createTemplate(formData: FormData) {
   await requireEditor()
   const htmlBody = formData.get('html_body') as string
-  requireUnsubscribeLink(htmlBody)
+
+  const validationErrors = validateTemplateHtml(htmlBody)
+  if (validationErrors.length > 0) {
+    redirect(`/templates/new?error=${encodeURIComponent(validationErrors[0])}`)
+  }
 
   const supabase = createServiceClient()
   const { error } = await supabase.from('templates').insert({
@@ -25,14 +25,18 @@ export async function createTemplate(formData: FormData) {
     text_body:    (formData.get('text_body')   as string) || null,
     category:     (formData.get('category')    as string) || 'general',
   })
-  if (error) throw new Error(error.message)
+  if (error) redirect(`/templates/new?error=${encodeURIComponent(error.message)}`)
   redirect('/templates')
 }
 
 export async function updateTemplate(id: string, formData: FormData) {
   await requireEditor()
   const htmlBody = formData.get('html_body') as string
-  requireUnsubscribeLink(htmlBody)
+
+  const validationErrors = validateTemplateHtml(htmlBody)
+  if (validationErrors.length > 0) {
+    redirect(`/templates/${id}/edit?error=${encodeURIComponent(validationErrors[0])}`)
+  }
 
   const supabase = createServiceClient()
   const { error } = await supabase
@@ -46,7 +50,7 @@ export async function updateTemplate(id: string, formData: FormData) {
       category:     (formData.get('category')    as string) || 'general',
     })
     .eq('id', id)
-  if (error) throw new Error(error.message)
+  if (error) redirect(`/templates/${id}/edit?error=${encodeURIComponent(error.message)}`)
   revalidatePath('/templates')
   redirect('/templates')
 }
