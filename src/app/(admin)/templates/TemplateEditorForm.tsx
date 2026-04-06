@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useTransition } from 'react'
 import Link from 'next/link'
 import { LogoSnippet } from './LogoSnippet'
 import { TEMPLATE_VAR_REFERENCE, SAMPLE_VARS, renderEmail } from '@/lib/email/renderer'
@@ -34,7 +34,7 @@ export function TemplateEditorForm({ action, submitLabel, cancelHref, extraButto
   const [htmlBody, setHtmlBody] = useState(template?.html_body ?? '')
   const [subject,  setSubject]  = useState(template?.subject ?? '')
   const [testSent, setTestSent] = useState(false)
-  const testFormRef = useRef<HTMLFormElement>(null)
+  const [isPending, startTransition] = useTransition()
 
   const optionalVars = TEMPLATE_VAR_REFERENCE.filter(v => !v.required)
 
@@ -169,24 +169,23 @@ export function TemplateEditorForm({ action, submitLabel, cancelHref, extraButto
           </button>
           {extraButtons}
           {/* Testmail knop — stuurt huidige HTML naar hello@nomad4life.com */}
-          <form
-            ref={testFormRef}
-            action={async (fd) => {
+          <button
+            type="button"
+            disabled={isPending}
+            onClick={() => {
+              const fd = new FormData()
               fd.set('html_body', htmlBody)
-              await sendTemplateTestMail(fd)
-              setTestSent(true)
-              setTimeout(() => setTestSent(false), 4000)
+              fd.set('subject',   subject)
+              startTransition(async () => {
+                await sendTemplateTestMail(fd)
+                setTestSent(true)
+                setTimeout(() => setTestSent(false), 4000)
+              })
             }}
-            className="contents"
+            className="rounded-md border border-blue-300 bg-blue-50 px-4 py-2 text-sm font-medium text-blue-700 hover:bg-blue-100 disabled:opacity-50 transition-colors"
           >
-            <input type="hidden" name="subject" value={subject} />
-            <button
-              type="submit"
-              className="rounded-md border border-blue-300 bg-blue-50 px-4 py-2 text-sm font-medium text-blue-700 hover:bg-blue-100 transition-colors"
-            >
-              {testSent ? '✓ Testmail verstuurd' : 'Stuur testmail →  hello@nomad4life.com'}
-            </button>
-          </form>
+            {isPending ? 'Versturen…' : testSent ? '✓ Verstuurd' : 'Stuur testmail → hello@nomad4life.com'}
+          </button>
           <Link
             href={cancelHref}
             className="rounded-md border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50 transition-colors"
