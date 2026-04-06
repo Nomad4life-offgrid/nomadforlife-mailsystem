@@ -48,16 +48,9 @@ export async function createCampaign(
     batch_size:           formData.get('batch_size') || 0,
   }
 
-  console.log('[createCampaign] raw:', JSON.stringify(raw))
-
   const parsed = CampaignSchema.safeParse(raw)
   if (!parsed.success) {
-    const fieldErrors = parsed.error.flatten().fieldErrors
-    console.log('[createCampaign] validation errors:', JSON.stringify(fieldErrors))
-    return {
-      message: 'Validatiefout: ' + Object.entries(fieldErrors).map(([k, v]) => `${k}: ${v?.join(', ')}`).join(' | '),
-      errors: fieldErrors,
-    }
+    return { errors: parsed.error.flatten().fieldErrors }
   }
 
   const { reply_to, ...rest } = parsed.data

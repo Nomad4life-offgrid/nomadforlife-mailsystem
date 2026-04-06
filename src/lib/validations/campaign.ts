@@ -20,8 +20,16 @@ export const CampaignSchema = z.object({
   template_id:          z.string().uuid('Ongeldig template').nullish().transform((v) => v || null),
   // Doelgroep (one_off)
   audience_type:        z.enum(['group', 'segment']).nullish().transform((v) => v || null),
-  audience_group_id:    z.string().uuid().nullish().transform((v) => v || null),
-  audience_segment_id:  z.string().uuid().nullish().transform((v) => v || null),
+  audience_group_id:    z.string().nullish().transform((v) => {
+    if (!v) return null
+    const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+    return UUID_RE.test(v) ? v : null
+  }),
+  audience_segment_id:  z.string().nullish().transform((v) => {
+    if (!v) return null
+    const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+    return UUID_RE.test(v) ? v : null
+  }),
   // Verzending (one_off)
   planned_send_at:      z.string().nullish().transform((v) => v || null),
   batch_size:           z.coerce.number().int().min(0).default(0),
