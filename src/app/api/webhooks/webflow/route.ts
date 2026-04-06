@@ -109,23 +109,44 @@ export async function POST(req: NextRequest) {
     )
   }
 
-  // Webflow stuurt: { name, data: { ... }, site, country }
-  if (
-    typeof body !== 'object' ||
-    body === null ||
-    typeof (body as Record<string, unknown>).data !== 'object' ||
-    (body as Record<string, unknown>).data === null
-  ) {
+  // Webflow stuurt twee mogelijke formaten:
+  //   Legacy / "Send to": { name, data: { ... }, site, country }
+  //   API v2 webhook:     { triggerType, payload: { name, data: { ... }, siteId, ... } }
+  if (typeof body !== 'object' || body === null) {
     return NextResponse.json(
-      { status: 'error', message: 'Onverwacht payload-formaat — data-object ontbreekt.' },
+      { status: 'error', message: 'Onverwacht payload-formaat.' },
       { status: 400 },
     )
   }
 
-  const formData = (body as Record<string, unknown>).data as Record<string, unknown>
-  const formName = typeof (body as Record<string, unknown>).name === 'string'
-    ? String((body as Record<string, unknown>).name)
-    : 'webflow_form'
+  const root = body as Record<string, unknown>
+
+  // Normaliseer naar { formName, formData }
+  let formData: Record<string, unknown>
+  let formName: string
+
+  if (root.triggerType === 'form_submission' && typeof root.payload === 'object' && root.payload !== null) {
+    // API v2 formaat
+    const p = root.payload as Record<string, unknown>
+    if (typeof p.data !== 'object' || p.data === null) {
+      return NextResponse.json(
+        { status: 'error', message: 'Onverwacht payload-formaat — data-object ontbreekt.' },
+        { status: 400 },
+      )
+    }
+    formData = p.data as Record<string, unknown>
+    formName = typeof p.name === 'string' ? p.name : 'webflow_form'
+  } else {
+    // Legacy / "Send to" formaat
+    if (typeof root.data !== 'object' || root.data === null) {
+      return NextResponse.json(
+        { status: 'error', message: 'Onverwacht payload-formaat — data-object ontbreekt.' },
+        { status: 400 },
+      )
+    }
+    formData = root.data as Record<string, unknown>
+    formName = typeof root.name === 'string' ? root.name : 'webflow_form'
+  }
 
   // ── Velden mappen ──────────────────────────────────────────────────────────
   const email      = getField(formData, 'email', 'e-mail', 'emailadres')
