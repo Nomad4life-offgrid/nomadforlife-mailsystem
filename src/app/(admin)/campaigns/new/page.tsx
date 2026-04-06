@@ -47,9 +47,9 @@ export default async function NewCampaignPage() {
         groups={(groups ?? []) as any}
         segments={(segments ?? []) as any}
         defaultValues={{
-          from_name:      process.env.DEFAULT_FROM_NAME  ?? '',
-          from_email:     process.env.DEFAULT_FROM_EMAIL ?? '',
-          reply_to_email: process.env.DEFAULT_FROM_EMAIL ?? '',
+          from_name:      process.env.DEFAULT_FROM_NAME  || 'Nomad For Life',
+          from_email:     process.env.DEFAULT_FROM_EMAIL || 'info@nomad4life.com',
+          reply_to_email: process.env.DEFAULT_FROM_EMAIL || 'info@nomad4life.com',
         }}
       />
     </div>
