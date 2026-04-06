@@ -157,16 +157,12 @@ export function renderEmail(opts: {
 
   const withFooter = opts.appendFooter !== false
 
-  const FOOTER_HTML = `
-<div style="margin-top:0;padding:30px 0 30px;text-align:left;font-family:sans-serif;color:#6b7280;font-size:13px;line-height:1.6">
-  <img src="https://cdn.prod.website-files.com/6963912f728a23f003e55b49/69d2140dbd9d0b0ab56fe8fa_Nomad-for-life.webp"
-       alt="Nomad For Life" width="140" style="display:block;margin:0 0 8px;height:auto" />
-  <a href="https://nomad4life.com" style="color:#6b7280;text-decoration:none">nomad4life.com</a>
-</div>`
+  const FOOTER_HTML = ``
 
   const FOOTER_TEXT = `\n\n--\nTeam Nomad For Life\nhttps://nomad4life.com`
 
-  const html = substituteVars(opts.htmlBody, vars) + (withFooter ? FOOTER_HTML : '')
+  const bodyHtml = substituteVars(opts.htmlBody, vars) + (withFooter ? FOOTER_HTML : '')
+  const html = `<div style="text-align:left;padding:40px 0">${bodyHtml}</div>`
   const rawText = opts.textBody ? opts.textBody : htmlToText(opts.htmlBody)
   const text    = substituteVars(rawText, vars) + (withFooter ? FOOTER_TEXT : '')
 
