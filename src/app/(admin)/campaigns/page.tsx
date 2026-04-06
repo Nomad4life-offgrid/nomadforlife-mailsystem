@@ -37,9 +37,9 @@ const TABS = [
 export default async function CampaignsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ status?: string }>
+  searchParams: Promise<{ status?: string; info?: string }>
 }) {
-  const { status: filterStatus } = await searchParams
+  const { status: filterStatus, info } = await searchParams
   const supabase = await createClient()
 
   const { data: allCampaigns } = await supabase
@@ -83,6 +83,13 @@ export default async function CampaignsPage({
           Nieuwe campagne
         </Link>
       </div>
+
+      {/* Succesmelding */}
+      {info && (
+        <div className="mt-4 rounded-md border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700">
+          {decodeURIComponent(info)}
+        </div>
+      )}
 
       {/* Status tabs */}
       <div className="mt-6 flex gap-1 border-b border-zinc-200">

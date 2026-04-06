@@ -69,7 +69,7 @@ export async function createCampaign(
   }
 
   revalidatePath('/campaigns')
-  redirect(`/campaigns/${data.id}?info=${encodeURIComponent('Campagne aangemaakt als concept.')}`)
+  redirect(`/campaigns?info=${encodeURIComponent('Campagne aangemaakt als concept.')}`)
 }
 
 // ── UPDATE ────────────────────────────────────────────────────────────────────
