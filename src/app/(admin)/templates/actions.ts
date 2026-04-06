@@ -55,6 +55,38 @@ export async function updateTemplate(id: string, formData: FormData) {
   redirect('/templates')
 }
 
+export async function sendTemplateTestMail(formData: FormData) {
+  await requireEditor()
+  const htmlBody  = formData.get('html_body')  as string
+  const subject   = (formData.get('subject') as string) || 'Testmail template'
+  const TEST_TO   = 'hello@nomad4life.com'
+
+  const { sendEmail } = await import('@/lib/email/sendgrid')
+  const { renderEmail } = await import('@/lib/email/renderer')
+
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://nomadforlife-mailsystem.vercel.app'
+
+  const { html, text } = renderEmail({
+    htmlBody,
+    textBody:       null,
+    contact:        { first_name: 'Test', last_name: 'Gebruiker', email: TEST_TO },
+    campaignName:   'Template preview',
+    companyName:    'Nomad For Life',
+    unsubscribeUrl: `${appUrl}/unsubscribe/preview`,
+  })
+
+  await sendEmail({
+    to:                   TEST_TO,
+    subject:              `[TEST] ${subject}`,
+    html,
+    text,
+    from_email:           process.env.DEFAULT_FROM_EMAIL ?? 'info@nomad4life.com',
+    from_name:            process.env.DEFAULT_FROM_NAME  ?? 'Nomad For Life',
+    unsubscribe_url:      `${appUrl}/unsubscribe/preview`,
+    unsubscribe_post_url: `${appUrl}/api/unsubscribe`,
+  })
+}
+
 export async function deleteTemplate(id: string) {
   await requireAdmin()
   const supabase = createServiceClient()

@@ -1,9 +1,10 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import Link from 'next/link'
 import { LogoSnippet } from './LogoSnippet'
 import { TEMPLATE_VAR_REFERENCE, SAMPLE_VARS, renderEmail } from '@/lib/email/renderer'
+import { sendTemplateTestMail } from './actions'
 
 const CATEGORIES = [
   { value: 'general',       label: 'Algemeen' },
@@ -29,8 +30,11 @@ type Props = {
 }
 
 export function TemplateEditorForm({ action, submitLabel, cancelHref, extraButtons, template }: Props) {
-  const [tab,     setTab]     = useState<'html' | 'preview'>('html')
+  const [tab,      setTab]      = useState<'html' | 'preview'>('html')
   const [htmlBody, setHtmlBody] = useState(template?.html_body ?? '')
+  const [subject,  setSubject]  = useState(template?.subject ?? '')
+  const [testSent, setTestSent] = useState(false)
+  const testFormRef = useRef<HTMLFormElement>(null)
 
   const optionalVars = TEMPLATE_VAR_REFERENCE.filter(v => !v.required)
 
@@ -102,6 +106,7 @@ export function TemplateEditorForm({ action, submitLabel, cancelHref, extraButto
             <input
               id="subject" name="subject" type="text" required
               defaultValue={template?.subject ?? ''}
+              onChange={e => setSubject(e.target.value)}
               placeholder="Bijv. Welkom bij {{company_name}}!"
               className="block w-full rounded-md border border-zinc-300 px-3 py-2 text-sm focus:border-zinc-500 focus:outline-none"
             />
@@ -155,7 +160,7 @@ export function TemplateEditorForm({ action, submitLabel, cancelHref, extraButto
           />
         </div>
 
-        <div className="flex gap-3 pt-2">
+        <div className="flex gap-3 pt-2 flex-wrap items-center">
           <button
             type="submit"
             className="rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-700 transition-colors"
@@ -163,6 +168,25 @@ export function TemplateEditorForm({ action, submitLabel, cancelHref, extraButto
             {submitLabel}
           </button>
           {extraButtons}
+          {/* Testmail knop — stuurt huidige HTML naar hello@nomad4life.com */}
+          <form
+            ref={testFormRef}
+            action={async (fd) => {
+              fd.set('html_body', htmlBody)
+              await sendTemplateTestMail(fd)
+              setTestSent(true)
+              setTimeout(() => setTestSent(false), 4000)
+            }}
+            className="contents"
+          >
+            <input type="hidden" name="subject" value={subject} />
+            <button
+              type="submit"
+              className="rounded-md border border-blue-300 bg-blue-50 px-4 py-2 text-sm font-medium text-blue-700 hover:bg-blue-100 transition-colors"
+            >
+              {testSent ? '✓ Testmail verstuurd' : 'Stuur testmail →  hello@nomad4life.com'}
+            </button>
+          </form>
           <Link
             href={cancelHref}
             className="rounded-md border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50 transition-colors"
