@@ -39,6 +39,7 @@ import { createServiceClient }       from '@/lib/supabase/service'
 import { checkRateLimit }            from '@/lib/utils/rate-limit'
 import { validateSubscribeDTO }      from '@/lib/signup/validate'
 import { processSubscribe }          from '@/lib/signup/process'
+import { sendEmail }                 from '@/lib/email/sendgrid'
 
 // Vaste UUID van de "Nieuwsbrief" contact_group (zie migratie 20260406000001).
 const NEWSLETTER_GROUP_ID = 'aaaaaaaa-0000-0000-0000-000000000001'
@@ -182,6 +183,41 @@ export async function POST(req: NextRequest) {
     const userAgent = req.headers.get('user-agent') ?? undefined
 
     const result = await processSubscribe(supabase, dto, { ip, userAgent })
+
+    // Stuur bevestigingsmail bij nieuwe inschrijving of herhaalverzoek
+    if (
+      result.token &&
+      (result.outcome === 'created' || result.outcome === 'restored' || result.outcome === 'confirmation_resent')
+    ) {
+      const appUrl     = process.env.NEXT_PUBLIC_APP_URL ?? ''
+      const confirmUrl = `${appUrl}/optin/${result.token}`
+      const firstName  = first_name ?? 'daar'
+
+      await sendEmail({
+        to:              dto.email,
+        subject:         'Bevestig je inschrijving voor Nomad For Life',
+        html: `
+          <p>Hoi ${firstName},</p>
+          <p>Klik op de knop hieronder om je inschrijving te bevestigen.</p>
+          <p style="margin:24px 0">
+            <a href="${confirmUrl}" style="background:#18181b;color:#fff;padding:12px 24px;border-radius:6px;text-decoration:none;font-weight:600">
+              Inschrijving bevestigen
+            </a>
+          </p>
+          <p style="color:#71717a;font-size:13px">
+            Heb je je niet aangemeld? Dan kun je deze mail negeren.<br>
+            Deze link werkt eenmalig.
+          </p>
+        `.trim(),
+        text:            `Hoi ${firstName},\n\nBevestig je inschrijving via:\n${confirmUrl}\n\nHeb je je niet aangemeld? Negeer deze mail dan.`,
+        from_email:      process.env.DEFAULT_FROM_EMAIL ?? '',
+        from_name:       process.env.DEFAULT_FROM_NAME  ?? '',
+        unsubscribe_url:      `${appUrl}/unsubscribe`,
+        unsubscribe_post_url: `${appUrl}/api/unsubscribe`,
+      }).catch(err => {
+        console.error('[webflow-webhook] bevestigingsmail mislukt:', err instanceof Error ? err.message : err)
+      })
+    }
 
     console.log(
       `[webflow-webhook] outcome:${result.outcome} contact:${result.contactId ?? '?'} ` +
