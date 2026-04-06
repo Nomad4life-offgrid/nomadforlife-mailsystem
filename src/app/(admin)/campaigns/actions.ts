@@ -27,6 +27,7 @@ export async function createCampaign(
   _prev: FormState,
   formData: FormData
 ): Promise<FormState> {
+  try {
   await requireEditor()
   const raw = {
     name:                 formData.get('name'),
@@ -47,9 +48,16 @@ export async function createCampaign(
     batch_size:           formData.get('batch_size') || 0,
   }
 
+  console.log('[createCampaign] raw:', JSON.stringify(raw))
+
   const parsed = CampaignSchema.safeParse(raw)
   if (!parsed.success) {
-    return { errors: parsed.error.flatten().fieldErrors }
+    const fieldErrors = parsed.error.flatten().fieldErrors
+    console.log('[createCampaign] validation errors:', JSON.stringify(fieldErrors))
+    return {
+      message: 'Validatiefout: ' + Object.entries(fieldErrors).map(([k, v]) => `${k}: ${v?.join(', ')}`).join(' | '),
+      errors: fieldErrors,
+    }
   }
 
   const { reply_to, ...rest } = parsed.data
@@ -70,6 +78,13 @@ export async function createCampaign(
 
   revalidatePath('/campaigns')
   redirect(`/campaigns?info=${encodeURIComponent('Campagne aangemaakt als concept.')}`)
+  } catch (err: unknown) {
+    // NEXT_REDIRECT is geen echte fout — doorgooien zodat Next.js hem afhandelt
+    if (err instanceof Error && err.message === 'NEXT_REDIRECT') throw err
+    const msg = err instanceof Error ? err.message : String(err)
+    console.error('[createCampaign] onverwachte fout:', msg)
+    return { message: `Onverwachte fout: ${msg}` }
+  }
 }
 
 // ── UPDATE ────────────────────────────────────────────────────────────────────
