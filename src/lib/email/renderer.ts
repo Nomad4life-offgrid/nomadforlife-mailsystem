@@ -165,16 +165,17 @@ export function renderEmail(opts: {
 
   // Buttons: alle <a>-tags met background(-color) in hun style krijgen geforceerde
   // kernstijlen — wit, padding 9×15, radius 8. Inline = kan niet overreden worden.
-  const BUTTON_CORE = 'color:#ffffff;padding:9px 15px;border-radius:8px;display:inline-block'
+  const BUTTON_CORE = 'background-color:#f85d1b;color:#ffffff;padding:9px 15px;border-radius:8px;display:inline-block'
   const styledBody = bodyHtml.replace(
     /<a(\b[^>]*\bstyle="([^"]*)"[^>]*)>/gi,
     (match, _attrs, styleVal: string) => {
       if (!/background/i.test(styleVal)) return match
       const cleaned = styleVal
-        .replace(/\bcolor\s*:[^;]+;?/gi,         '')
-        .replace(/\bpadding\s*:[^;]+;?/gi,        '')
-        .replace(/\bborder-radius\s*:[^;]+;?/gi,  '')
-        .replace(/\bdisplay\s*:[^;]+;?/gi,        '')
+        .replace(/\bbackground(-color)?\s*:[^;]+;?/gi, '')
+        .replace(/\bcolor\s*:[^;]+;?/gi,               '')
+        .replace(/\bpadding\s*:[^;]+;?/gi,             '')
+        .replace(/\bborder-radius\s*:[^;]+;?/gi,       '')
+        .replace(/\bdisplay\s*:[^;]+;?/gi,             '')
         .replace(/\s{2,}/g, ' ').trim().replace(/;$/, '')
       return match.replace(/style="[^"]*"/, `style="${cleaned};${BUTTON_CORE}"`)
     },
