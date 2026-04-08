@@ -11,13 +11,15 @@ type StepRow = { id: string; step_order: number; delay_days: number; delay_hours
 
 /**
  * Schedules mail_logs for all steps of a campaign run.
- * Cumulative delay = sum of (delay_days * 24 + delay_hours) for each step.
+ * Cumulative delay is calculated from startAtMs (defaults to now).
+ * Step 1 with delay 0 → scheduled_at = startAtMs (fires on first batch run after that time).
  */
 async function scheduleMailLogs(
-  supabase: ReturnType<typeof createServiceClient>,
-  runId:     string,
-  contactId: string,
-  steps:     StepRow[],
+  supabase:   ReturnType<typeof createServiceClient>,
+  runId:      string,
+  contactId:  string,
+  steps:      StepRow[],
+  startAtMs:  number = Date.now(),
 ): Promise<void> {
   if (steps.length === 0) return
 
@@ -28,7 +30,7 @@ async function scheduleMailLogs(
       campaign_run_id:  runId,
       campaign_step_id: step.id,
       contact_id:       contactId,
-      scheduled_at:     new Date(Date.now() + cumulativeMs).toISOString(),
+      scheduled_at:     new Date(startAtMs + cumulativeMs).toISOString(),
     })
   }
 }
@@ -54,6 +56,9 @@ export async function subscribeContacts(formData: FormData) {
   const supabase   = createServiceClient()
   const campaignId = formData.get('campaign_id') as string
   const rawEmails  = formData.get('emails') as string
+  // start_at is submitted as UTC ISO string from client
+  const startAtRaw = formData.get('start_at') as string | null
+  const startAtMs  = startAtRaw ? new Date(startAtRaw).getTime() : Date.now()
 
   const emails = rawEmails
     .split(/[\n,;]+/)
@@ -107,7 +112,7 @@ export async function subscribeContacts(formData: FormData) {
       .single()
 
     if (!run) continue
-    await scheduleMailLogs(supabase, run.id, contactId, steps)
+    await scheduleMailLogs(supabase, run.id, contactId, steps, startAtMs)
   }
 
   revalidatePath('/logs')
@@ -118,12 +123,16 @@ export async function subscribeContacts(formData: FormData) {
 
 /**
  * Schrijf alle actieve contacten in een groep in op een campagne.
+ * start_at (UTC ISO string) verschuift het startpunt van de funnel.
  */
 export async function subscribeGroup(formData: FormData) {
   await requireAdmin()
   const supabase   = createServiceClient()
   const campaignId = formData.get('campaign_id') as string
   const groupId    = formData.get('group_id')    as string
+  // start_at is submitted as UTC ISO string from client
+  const startAtRaw = formData.get('start_at') as string | null
+  const startAtMs  = startAtRaw ? new Date(startAtRaw).getTime() : Date.now()
 
   if (!campaignId || !groupId) throw new Error('Campagne en segment zijn verplicht.')
 
@@ -159,7 +168,7 @@ export async function subscribeGroup(formData: FormData) {
       .single()
 
     if (!run) continue
-    await scheduleMailLogs(supabase, run.id, contact.id, steps)
+    await scheduleMailLogs(supabase, run.id, contact.id, steps, startAtMs)
   }
 
   revalidatePath('/logs')
