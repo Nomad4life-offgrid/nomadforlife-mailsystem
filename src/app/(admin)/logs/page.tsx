@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
+import { LogsChart } from './LogsChart'
 
 export const metadata = { title: 'Mail Logs' }
 
@@ -24,18 +25,24 @@ export default async function LogsPage({
   const offset  = (pageNum - 1) * PAGE_SIZE
   const supabase = await createClient()
 
-  // Status counts for filter tabs
-  const countResults = await Promise.all(
-    ['pending', 'sent', 'failed', 'skipped'].map((s) =>
-      supabase.from('mail_logs').select('*', { count: 'exact', head: true }).eq('status', s)
-    )
-  )
-  const { count: totalCount } = await supabase.from('mail_logs').select('*', { count: 'exact', head: true })
+  // Status counts for filter tabs + chart
+  const [pendingRes, sentRes, failedRes, skippedRes, openedRes, totalRes] = await Promise.all([
+    supabase.from('mail_logs').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
+    supabase.from('mail_logs').select('*', { count: 'exact', head: true }).eq('status', 'sent'),
+    supabase.from('mail_logs').select('*', { count: 'exact', head: true }).eq('status', 'failed'),
+    supabase.from('mail_logs').select('*', { count: 'exact', head: true }).eq('status', 'skipped'),
+    supabase.from('mail_logs').select('*', { count: 'exact', head: true }).eq('status', 'sent').not('opened_at', 'is', null),
+    supabase.from('mail_logs').select('*', { count: 'exact', head: true }),
+  ])
 
-  const counts: Record<string, number> = { all: totalCount ?? 0 }
-  ;['pending', 'sent', 'failed', 'skipped'].forEach((s, i) => {
-    counts[s] = countResults[i].count ?? 0
-  })
+  const counts: Record<string, number> = {
+    all:     totalRes.count   ?? 0,
+    pending: pendingRes.count ?? 0,
+    sent:    sentRes.count    ?? 0,
+    failed:  failedRes.count  ?? 0,
+    skipped: skippedRes.count ?? 0,
+  }
+  const openedCount = openedRes.count ?? 0
 
   // Logs query with pagination
   let query = supabase
@@ -97,6 +104,20 @@ export default async function LogsPage({
           </Link>
         )}
       </div>
+
+      {/* Chart */}
+      {counts.all > 0 && (
+        <div className="mt-6 rounded-xl border border-zinc-200 bg-white px-8 py-6">
+          <p className="mb-5 text-xs font-semibold uppercase tracking-wide text-zinc-400">Statistieken</p>
+          <LogsChart
+            sent={counts.sent}
+            opened={openedCount}
+            failed={counts.failed}
+            skipped={counts.skipped}
+            pending={counts.pending}
+          />
+        </div>
+      )}
 
       {/* Status filter tabs */}
       <div className="mt-6 flex gap-1 border-b border-zinc-200">
