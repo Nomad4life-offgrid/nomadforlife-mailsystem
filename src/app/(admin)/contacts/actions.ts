@@ -15,6 +15,8 @@ export type ImportResult = {
   skipped: number
   failed: number
   errors: string[]
+  group_name?: string
+  group_added?: number
 } | null
 
 // ── Shared state type (returned by useActionState actions) ────────────────────
@@ -228,6 +230,7 @@ const BATCH_SIZE = 100
  * Importeert contacten vanuit een geparseerde CSV als JSON-string.
  * Alle geïmporteerde contacten worden direct opt-in gezet (source='import').
  * Voert inserts uit in batches van BATCH_SIZE om DB-limieten te respecteren.
+ * Optioneel: voegt alle contacten toe aan een statische groep (group_id).
  */
 export async function importContacts(
   _prev: ImportResult,
@@ -239,6 +242,8 @@ export async function importContacts(
   if (!rawJson || typeof rawJson !== 'string') {
     return { imported: 0, skipped: 0, failed: 0, errors: ['Geen gegevens ontvangen.'] }
   }
+
+  const groupId = (formData.get('group_id') as string | null) || null
 
   let rows: unknown[]
   try {
@@ -319,9 +324,51 @@ export async function importContacts(
     }
   }
 
+  // ── Voeg alle CSV-contacten toe aan de geselecteerde groep ───────────────
+  let groupName: string | undefined
+  let groupAdded: number | undefined
+
+  if (groupId) {
+    // Resolve group name
+    const { data: group } = await supabase
+      .from('contact_groups')
+      .select('name')
+      .eq('id', groupId)
+      .single()
+    groupName = group?.name
+
+    // Fetch IDs of all contacts in the CSV (new + already existing)
+    const emails = validRows.map((r) => r.email.toLowerCase().trim())
+    const { data: allContacts } = await supabase
+      .from('contacts')
+      .select('id')
+      .in('email', emails)
+      .is('deleted_at', null)
+
+    if (allContacts && allContacts.length > 0) {
+      const members = allContacts.map((c) => ({
+        contact_id: c.id,
+        group_id:   groupId,
+        added_at:   now,
+      }))
+
+      // Upsert in batches — ignore duplicates (already members)
+      for (let start = 0; start < members.length; start += BATCH_SIZE) {
+        const batch = members.slice(start, start + BATCH_SIZE)
+        await supabase
+          .from('contact_group_members')
+          .upsert(batch, { onConflict: 'contact_id,group_id', ignoreDuplicates: true })
+      }
+
+      groupAdded = allContacts.length
+    }
+
+    revalidatePath('/segments')
+  }
+
   revalidatePath('/contacts')
 
-  return { imported, skipped, failed, errors }
+  return { imported, skipped, failed, errors, group_name: groupName, group_added: groupAdded }
 }
 
 export async function optOutContact(id: string) {
