@@ -8,6 +8,15 @@ import { ContactSchema, UpdateContactSchema } from '@/lib/validations/contact'
 import { logConsent } from '@/lib/consent/log'
 import { requireAdmin, requireEditor } from '@/lib/auth/guards'
 
+// ── Import result type ────────────────────────────────────────────────────────
+
+export type ImportResult = {
+  imported: number
+  skipped: number
+  failed: number
+  errors: string[]
+} | null
+
 // ── Shared state type (returned by useActionState actions) ────────────────────
 
 export type ContactFormState = {
@@ -201,6 +210,118 @@ export async function optInContact(id: string) {
 
   revalidatePath(`/contacts/${id}`)
   revalidatePath('/contacts')
+}
+
+// ── IMPORT ────────────────────────────────────────────────────────────────────
+
+const ImportRowSchema = z.object({
+  email:        z.string().email(),
+  first_name:   z.string().optional().nullable(),
+  last_name:    z.string().optional().nullable(),
+  company:      z.string().optional().nullable(),
+  contact_type: z.enum(['camping','sponsor','adverteerder','lid','partner','prospect','overig']).optional().nullable(),
+})
+
+const BATCH_SIZE = 100
+
+/**
+ * Importeert contacten vanuit een geparseerde CSV als JSON-string.
+ * Alle geïmporteerde contacten worden direct opt-in gezet (source='import').
+ * Voert inserts uit in batches van BATCH_SIZE om DB-limieten te respecteren.
+ */
+export async function importContacts(
+  _prev: ImportResult,
+  formData: FormData,
+): Promise<ImportResult> {
+  await requireEditor()
+
+  const rawJson = formData.get('rows')
+  if (!rawJson || typeof rawJson !== 'string') {
+    return { imported: 0, skipped: 0, failed: 0, errors: ['Geen gegevens ontvangen.'] }
+  }
+
+  let rows: unknown[]
+  try {
+    rows = JSON.parse(rawJson)
+  } catch {
+    return { imported: 0, skipped: 0, failed: 0, errors: ['Ongeldige JSON-invoer.'] }
+  }
+
+  if (!Array.isArray(rows) || rows.length === 0) {
+    return { imported: 0, skipped: 0, failed: 0, errors: ['Geen rijen gevonden.'] }
+  }
+
+  const supabase = createServiceClient()
+  const now      = new Date().toISOString()
+
+  let imported = 0
+  let skipped  = 0
+  let failed   = 0
+  const errors: string[] = []
+
+  // Validate all rows first
+  const validRows: z.infer<typeof ImportRowSchema>[] = []
+  for (let i = 0; i < rows.length; i++) {
+    const parsed = ImportRowSchema.safeParse(rows[i])
+    if (!parsed.success) {
+      failed++
+      errors.push(`Rij ${i + 1}: ${parsed.error.issues[0]?.message ?? 'Ongeldig'}`)
+    } else {
+      validRows.push(parsed.data)
+    }
+  }
+
+  // Process in batches of BATCH_SIZE
+  for (let start = 0; start < validRows.length; start += BATCH_SIZE) {
+    const batch = validRows.slice(start, start + BATCH_SIZE)
+
+    const records = batch.map((row) => ({
+      email:        row.email.toLowerCase().trim(),
+      first_name:   row.first_name  || null,
+      last_name:    row.last_name   || null,
+      company:      row.company     || null,
+      contact_type: row.contact_type || null,
+      source:       'import' as const,
+      opted_in:     true,
+      opted_in_at:  now,
+      status:       'active' as const,
+    }))
+
+    const { data: inserted, error } = await supabase
+      .from('contacts')
+      .upsert(records, {
+        onConflict:        'email',
+        ignoreDuplicates:  true,
+      })
+      .select('id')
+
+    if (error) {
+      failed += batch.length
+      errors.push(`Batch fout: ${error.message}`)
+      continue
+    }
+
+    const newCount = inserted?.length ?? 0
+    imported += newCount
+    skipped  += batch.length - newCount
+
+    // Log consent for each newly inserted contact
+    if (inserted && inserted.length > 0) {
+      for (const contact of inserted) {
+        await logConsent({
+          supabase,
+          contactId: contact.id,
+          eventType: 'imported',
+          channel:   'admin',
+          notes:     'Geïmporteerd via CSV-import door beheerder',
+        })
+      }
+    }
+  }
+
+  revalidatePath('/contacts')
+
+  return { imported, skipped, failed, errors }
 }
 
 export async function optOutContact(id: string) {
