@@ -8,7 +8,7 @@
 
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { sendEmail }          from '@/lib/email/sendgrid'
-import { renderEmail, SAMPLE_VARS } from '@/lib/email/renderer'
+import { renderEmail, SAMPLE_VARS, htmlToText } from '@/lib/email/renderer'
 import type { SendResult }    from '@/lib/email/sendgrid'
 
 export type TestMailOptions = {
@@ -65,9 +65,11 @@ export async function sendTestEmail(opts: TestMailOptions): Promise<SendResult> 
     appendFooter:   false,
   })
 
+  const cleanSubject = htmlToText(renderedSubject).replace(/\s+/g, ' ').trim()
+
   return sendEmail({
     to:                   opts.toEmail,
-    subject:              `[TESTMAIL] ${renderedSubject}`,
+    subject:              `[TESTMAIL] ${cleanSubject}`,
     html,
     text,
     from_email:           opts.fromEmail,

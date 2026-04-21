@@ -3,7 +3,12 @@
  * Variabele-substitutie en HTML→tekst-conversie leven in renderer.ts.
  */
 
-import { renderEmail } from './renderer'
+import { renderEmail, htmlToText } from './renderer'
+
+/** Subjects moeten platte tekst zijn — strip HTML, flatten whitespace. */
+function sanitizeSubject(raw: string): string {
+  return htmlToText(raw).replace(/\s+/g, ' ').trim()
+}
 
 export type MailPayload = {
   to:                   string
@@ -38,7 +43,7 @@ export function buildMailPayload(opts: {
   })
 
   // Subject kan ook variabelen bevatten — substitueer apart (geen footer)
-  const { html: subject } = renderEmail({
+  const { html: subjectHtml } = renderEmail({
     htmlBody:       template.subject,
     textBody:       null,
     contact,
@@ -47,6 +52,8 @@ export function buildMailPayload(opts: {
     unsubscribeUrl,
     appendFooter:   false,
   })
+
+  const subject = sanitizeSubject(subjectHtml)
 
   return {
     to:                   contact.email,
