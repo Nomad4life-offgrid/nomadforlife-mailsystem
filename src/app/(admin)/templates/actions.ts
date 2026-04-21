@@ -3,8 +3,18 @@
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { createServiceClient } from '@/lib/supabase/service'
-import { validateTemplateHtml } from '@/lib/email/renderer'
+import { validateTemplateHtml, htmlToText } from '@/lib/email/renderer'
 import { requireAdmin, requireEditor } from '@/lib/auth/guards'
+
+/**
+ * Subject-veld moet platte tekst zijn — strip HTML en flatten whitespace.
+ * Admins kunnen per ongeluk styled HTML plakken (bv. uit de body-editor);
+ * we schonen dat server-side op zodat e-mailclients altijd een nette
+ * onderwerpregel tonen.
+ */
+function cleanSubject(raw: string): string {
+  return htmlToText(raw).replace(/\s+/g, ' ').trim()
+}
 
 
 export async function createTemplate(formData: FormData) {
@@ -19,7 +29,7 @@ export async function createTemplate(formData: FormData) {
   const supabase = createServiceClient()
   const { error } = await supabase.from('templates').insert({
     name:         formData.get('name')         as string,
-    subject:      formData.get('subject')      as string,
+    subject:      cleanSubject(formData.get('subject') as string),
     preview_text: (formData.get('preview_text') as string) || null,
     html_body:    htmlBody,
     text_body:    (formData.get('text_body')   as string) || null,
@@ -43,7 +53,7 @@ export async function updateTemplate(id: string, formData: FormData) {
     .from('templates')
     .update({
       name:         formData.get('name')         as string,
-      subject:      formData.get('subject')      as string,
+      subject:      cleanSubject(formData.get('subject') as string),
       preview_text: (formData.get('preview_text') as string) || null,
       html_body:    htmlBody,
       text_body:    (formData.get('text_body')   as string) || null,

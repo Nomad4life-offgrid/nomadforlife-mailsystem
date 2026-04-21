@@ -6,6 +6,11 @@ import { LogoSnippet } from './LogoSnippet'
 import { TEMPLATE_VAR_REFERENCE, SAMPLE_VARS, renderEmail } from '@/lib/email/renderer'
 import { sendTemplateTestMail } from './actions'
 
+/** Client-side HTML strip — zelfde vorm als de server-cleanup. */
+function stripHtml(s: string): string {
+  return s.replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trimStart()
+}
+
 const CATEGORIES = [
   { value: 'general',       label: 'Algemeen' },
   { value: 'onboarding',    label: 'Onboarding' },
@@ -104,12 +109,20 @@ export function TemplateEditorForm({ action, submitLabel, cancelHref, extraButto
               Standaard onderwerpregel <span className="text-red-500">*</span>
             </label>
             <input
-              id="subject" name="subject" type="text" required
-              defaultValue={template?.subject ?? ''}
-              onChange={e => setSubject(e.target.value)}
+              id="subject" name="subject" type="text" required maxLength={200}
+              value={subject}
+              onChange={e => setSubject(stripHtml(e.target.value))}
+              onPaste={e => {
+                e.preventDefault()
+                const pasted = e.clipboardData.getData('text/plain') || e.clipboardData.getData('text')
+                setSubject(stripHtml(pasted))
+              }}
               placeholder="Bijv. Welkom bij {{company_name}}!"
               className="block w-full rounded-md border border-zinc-300 px-3 py-2 text-sm focus:border-zinc-500 focus:outline-none"
             />
+            <p className="mt-1 text-xs text-zinc-400">
+              Alleen platte tekst. HTML-code wordt automatisch verwijderd bij plakken.
+            </p>
           </div>
           <div>
             <label className="block text-sm font-medium text-zinc-700 mb-1" htmlFor="preview_text">

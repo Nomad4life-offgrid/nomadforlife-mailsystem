@@ -6,7 +6,15 @@ import { createServiceClient } from '@/lib/supabase/service'
 import { resolveAudienceContacts } from '@/lib/services/audience'
 import { CampaignSchema, UpdateCampaignSchema } from '@/lib/validations/campaign'
 import { requireAdmin, requireEditor } from '@/lib/auth/guards'
+import { htmlToText } from '@/lib/email/renderer'
 import type { Campaign } from '@/types'
+
+/** Subjects moeten platte tekst zijn — strip HTML en flatten whitespace. */
+function cleanSubject(raw: string | null | undefined): string | null {
+  if (!raw) return null
+  const clean = htmlToText(raw).replace(/\s+/g, ' ').trim()
+  return clean || null
+}
 
 // ── Gedeeld type ──────────────────────────────────────────────────────────────
 
@@ -38,7 +46,7 @@ export async function createCampaign(
     reply_to:             formData.get('reply_to') || null,
     track_opens:          parseCheckbox(formData, 'track_opens'),
     track_clicks:         parseCheckbox(formData, 'track_clicks'),
-    subject:              formData.get('subject') || null,
+    subject:              cleanSubject(formData.get('subject') as string | null),
     preview_text:         formData.get('preview_text') || null,
     template_id:          formData.get('template_id') || null,
     audience_type:        formData.get('audience_type') || null,
@@ -96,7 +104,7 @@ export async function updateCampaign(
     reply_to:             formData.get('reply_to') || null,
     track_opens:          parseCheckbox(formData, 'track_opens'),
     track_clicks:         parseCheckbox(formData, 'track_clicks'),
-    subject:              formData.get('subject') || null,
+    subject:              cleanSubject(formData.get('subject') as string | null),
     preview_text:         formData.get('preview_text') || null,
     template_id:          formData.get('template_id') || null,
     audience_type:        formData.get('audience_type') || null,
@@ -428,7 +436,7 @@ export async function addCampaignStep(campaignId: string, formData: FormData) {
   const template_id = (formData.get('template_id') as string)?.trim()
   if (!template_id) throw new Error('Template is verplicht.')
 
-  const subject      = (formData.get('subject') as string)?.trim()      || null
+  const subject      = cleanSubject(formData.get('subject') as string | null)
   const preview_text = (formData.get('preview_text') as string)?.trim() || null
   const delay_hours  = Math.max(0, Number(formData.get('delay_hours') ?? 0))
   const delay_days   = Math.max(0, Number(formData.get('delay_days')  ?? 0))
@@ -465,7 +473,7 @@ export async function updateCampaignStep(
   const template_id = (formData.get('template_id') as string)?.trim()
   if (!template_id) throw new Error('Template is verplicht.')
 
-  const subject          = (formData.get('subject') as string)?.trim()      || null
+  const subject          = cleanSubject(formData.get('subject') as string | null)
   const preview_text     = (formData.get('preview_text') as string)?.trim() || null
   const delay_hours      = Math.max(0, Number(formData.get('delay_hours')  ?? 0))
   const delay_days       = Math.max(0, Number(formData.get('delay_days')   ?? 0))
