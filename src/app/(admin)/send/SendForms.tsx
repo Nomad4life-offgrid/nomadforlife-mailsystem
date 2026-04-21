@@ -1,7 +1,47 @@
 'use client'
 
 import { useState } from 'react'
+import { useFormStatus } from 'react-dom'
 import { subscribeGroup, subscribeContacts } from './actions'
+
+/** Full-screen overlay shown while a form action is pending. */
+function PendingOverlay({ title, description }: { title: string; description: string }) {
+  const { pending } = useFormStatus()
+  if (!pending) return null
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+      <div className="rounded-xl bg-white shadow-xl px-8 py-6 max-w-sm w-[90%] text-center">
+        <svg className="mx-auto h-10 w-10 animate-spin text-zinc-900" viewBox="0 0 24 24" fill="none">
+          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
+        </svg>
+        <h3 className="mt-3 text-base font-semibold text-zinc-900">{title}</h3>
+        <p className="mt-1 text-sm text-zinc-500">{description}</p>
+      </div>
+    </div>
+  )
+}
+
+/** Submit button that greys out while the form action is pending. */
+function SubmitButton({ label }: { label: string }) {
+  const { pending } = useFormStatus()
+  return (
+    <button
+      type="submit"
+      disabled={pending}
+      className="inline-flex items-center gap-2 rounded-md bg-zinc-900 px-5 py-2 text-sm font-medium text-white hover:bg-zinc-700 disabled:opacity-50 disabled:cursor-wait transition-colors"
+    >
+      {pending && (
+        <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
+          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
+        </svg>
+      )}
+      {pending ? 'Bezig met inschrijven…' : label}
+    </button>
+  )
+}
 
 type Campaign = {
   id: string
@@ -44,6 +84,10 @@ export function SegmentForm({ campaigns, groups }: { campaigns: Campaign[]; grou
 
   return (
     <form action={subscribeGroup} className="p-6 space-y-4">
+      <PendingOverlay
+        title="Segment wordt ingeschreven…"
+        description="De contacten worden geladen en ingepland. Dit kan even duren bij grote segmenten."
+      />
       {/* Hidden UTC-ISO start_at — only relevant for funnels */}
       {showDate && <input type="hidden" name="start_at" value={toUtcIso(startAtLocal)} />}
 
@@ -98,12 +142,7 @@ export function SegmentForm({ campaigns, groups }: { campaigns: Campaign[]; grou
         </div>
       )}
 
-      <button
-        type="submit"
-        className="rounded-md bg-zinc-900 px-5 py-2 text-sm font-medium text-white hover:bg-zinc-700 transition-colors"
-      >
-        Inschrijven &amp; inplannen
-      </button>
+      <SubmitButton label="Inschrijven & inplannen" />
     </form>
   )
 }
@@ -117,6 +156,10 @@ export function EmailForm({ campaigns }: { campaigns: Campaign[] }) {
 
   return (
     <form action={subscribeContacts} className="p-6 space-y-4">
+      <PendingOverlay
+        title="Contacten worden ingeschreven…"
+        description="De e-mailadressen worden verwerkt en ingepland. Dit kan even duren."
+      />
       {showDate && <input type="hidden" name="start_at" value={toUtcIso(startAtLocal)} />}
 
       <div>
@@ -193,12 +236,7 @@ export function EmailForm({ campaigns }: { campaigns: Campaign[] }) {
         </div>
       )}
 
-      <button
-        type="submit"
-        className="rounded-md bg-zinc-900 px-5 py-2 text-sm font-medium text-white hover:bg-zinc-700 transition-colors"
-      >
-        Inschrijven &amp; inplannen
-      </button>
+      <SubmitButton label="Inschrijven & inplannen" />
     </form>
   )
 }
