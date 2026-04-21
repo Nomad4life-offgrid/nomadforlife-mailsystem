@@ -195,11 +195,11 @@ export default async function GroupDetailPage({
             <h2 className="text-sm font-semibold text-zinc-700 mb-3">CSV importeren</h2>
             <div className="rounded-xl border border-zinc-200 bg-white p-5 space-y-3">
               <p className="text-xs text-zinc-500">
-                Upload een CSV-bestand om meerdere contacten tegelijk toe te voegen aan deze lijst.
-                Kolommen zoals <code className="font-mono bg-zinc-100 px-1 rounded">company</code> en
-                {' '}<code className="font-mono bg-zinc-100 px-1 rounded">first_name</code> worden gebruikt
-                voor personalisatie (<code className="font-mono bg-zinc-100 px-1 rounded">{'{{company_name}}'}</code>,
-                {' '}<code className="font-mono bg-zinc-100 px-1 rounded">{'{{first_name}}'}</code>).
+                Upload een CSV-bestand met twee kolommen:
+                {' '}<code className="font-mono bg-zinc-100 px-1 rounded">company</code> en
+                {' '}<code className="font-mono bg-zinc-100 px-1 rounded">email</code>.
+                De bedrijfsnaam wordt gebruikt voor personalisatie via
+                {' '}<code className="font-mono bg-zinc-100 px-1 rounded">{'{{company_name}}'}</code>.
               </p>
               <Link
                 href={`/contacts/import?group_id=${id}`}

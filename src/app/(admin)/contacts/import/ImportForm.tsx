@@ -127,7 +127,7 @@ export function ImportForm({ groups, defaultGroupId }: { groups: Group[]; defaul
             <div>
               <p className="font-semibold text-blue-900">Zo stel je je CSV samen</p>
               <p className="mt-0.5 text-blue-800 text-xs">
-                Kolommen gescheiden door <strong>;</strong> (puntkomma) of <strong>,</strong> (komma). Eerste regel bevat de kolomnamen.
+                Twee kolommen: <strong>company</strong> en <strong>email</strong>. Gescheiden door <strong>;</strong> (puntkomma) of <strong>,</strong> (komma). Eerste regel bevat de kolomnamen.
               </p>
             </div>
 
@@ -142,29 +142,14 @@ export function ImportForm({ groups, defaultGroupId }: { groups: Group[]; defaul
                 </thead>
                 <tbody className="divide-y divide-blue-100 text-blue-900">
                   <tr>
-                    <td className="px-3 py-1.5 font-mono">email</td>
-                    <td className="px-3 py-1.5 font-mono">{'{{email}}'}</td>
-                    <td className="px-3 py-1.5">Ja</td>
-                  </tr>
-                  <tr>
-                    <td className="px-3 py-1.5 font-mono">first_name <span className="text-blue-500">(of voornaam)</span></td>
-                    <td className="px-3 py-1.5 font-mono">{'{{first_name}}'}</td>
-                    <td className="px-3 py-1.5">Nee</td>
-                  </tr>
-                  <tr>
-                    <td className="px-3 py-1.5 font-mono">last_name <span className="text-blue-500">(of achternaam)</span></td>
-                    <td className="px-3 py-1.5 font-mono">{'{{last_name}}'}</td>
-                    <td className="px-3 py-1.5">Nee</td>
-                  </tr>
-                  <tr>
                     <td className="px-3 py-1.5 font-mono">company <span className="text-blue-500">(of bedrijf)</span></td>
                     <td className="px-3 py-1.5 font-mono">{'{{company_name}}'}</td>
                     <td className="px-3 py-1.5">Nee</td>
                   </tr>
                   <tr>
-                    <td className="px-3 py-1.5 font-mono">contact_type <span className="text-blue-500">(of type)</span></td>
-                    <td className="px-3 py-1.5 text-blue-500">— (sortering)</td>
-                    <td className="px-3 py-1.5">Nee</td>
+                    <td className="px-3 py-1.5 font-mono">email</td>
+                    <td className="px-3 py-1.5 font-mono">{'{{email}}'}</td>
+                    <td className="px-3 py-1.5">Ja</td>
                   </tr>
                 </tbody>
               </table>
@@ -172,12 +157,15 @@ export function ImportForm({ groups, defaultGroupId }: { groups: Group[]; defaul
 
             <div>
               <p className="font-semibold text-blue-900 text-xs">Voorbeeld</p>
-              <pre className="mt-1 rounded bg-white/80 border border-blue-200 p-2 text-[11px] font-mono text-blue-900 overflow-x-auto">{`company;first_name;last_name;email
-Acme Tenten;Jan;de Vries;jan@acme.nl
-Boertje Glamp;;;info@boertje.nl
-;Piet;;piet@example.com`}</pre>
+              <pre className="mt-1 rounded bg-white/80 border border-blue-200 p-2 text-[11px] font-mono text-blue-900 overflow-x-auto">{`company;email
+Acme Tenten;info@acme.nl
+Boertje Glamp;marijn@boertje.nl
+Nomad Outdoor;contact@nomad-outdoor.nl`}</pre>
               <p className="mt-1 text-[11px] text-blue-700">
-                Lege kolommen mogen. De volgorde van de kolommen maakt niet uit, zolang de kopregel klopt.
+                De kolom <code className="font-mono bg-white/80 px-1 rounded">company</code> vult automatisch
+                {' '}<code className="font-mono bg-white/80 px-1 rounded">{'{{company_name}}'}</code>{' '}
+                in de e-mail. Lege <code className="font-mono bg-white/80 px-1 rounded">company</code>-velden
+                mogen — dan toont de mail de standaardnaam.
               </p>
             </div>
           </div>
