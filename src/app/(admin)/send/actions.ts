@@ -51,31 +51,57 @@ async function fetchSteps(
 
 // ── subscribeContacts ─────────────────────────────────────────────────────────
 
+/**
+ * Parse textarea input into { email, company } entries.
+ * - Line with `;` → "Company Name;email@x.nl"
+ * - Line without `;` → one or more emails separated by comma
+ */
+function parseEmailEntries(raw: string): Array<{ email: string; company: string | null }> {
+  const entries: Array<{ email: string; company: string | null }> = []
+
+  for (const rawLine of raw.split(/\r?\n/)) {
+    const line = rawLine.trim()
+    if (!line) continue
+
+    if (line.includes(';')) {
+      const sepIdx  = line.indexOf(';')
+      const company = line.slice(0, sepIdx).trim()
+      const email   = line.slice(sepIdx + 1).trim().toLowerCase()
+      if (email) entries.push({ email, company: company || null })
+      continue
+    }
+
+    // No company — allow comma-separated emails per line
+    for (const part of line.split(',')) {
+      const email = part.trim().toLowerCase()
+      if (email) entries.push({ email, company: null })
+    }
+  }
+  return entries
+}
+
 export async function subscribeContacts(formData: FormData) {
   await requireAdmin()
   const supabase   = createServiceClient()
   const campaignId = formData.get('campaign_id') as string
-  const rawEmails  = formData.get('emails') as string
+  const rawEmails  = (formData.get('emails') as string) ?? ''
   // start_at is submitted as UTC ISO string from client
   const startAtRaw = formData.get('start_at') as string | null
   const startAtMs  = startAtRaw ? new Date(startAtRaw).getTime() : Date.now()
 
-  const emails = rawEmails
-    .split(/[\n,;]+/)
-    .map((e) => e.trim().toLowerCase())
-    .filter(Boolean)
+  const entries = parseEmailEntries(rawEmails)
 
-  if (!campaignId || emails.length === 0) {
+  if (!campaignId || entries.length === 0) {
     throw new Error('Campaign and at least one email are required.')
   }
 
   const steps = await fetchSteps(supabase, campaignId)
   const now   = new Date().toISOString()
 
-  for (const email of emails) {
+  for (const { email, company } of entries) {
     const { data: existing } = await supabase
       .from('contacts')
-      .select('id, global_opt_out, opted_in, status')
+      .select('id, global_opt_out, opted_in, status, company')
       .eq('email', email)
       .single()
 
@@ -85,12 +111,21 @@ export async function subscribeContacts(formData: FormData) {
       if (existing.global_opt_out || existing.status === 'opted_out') continue
       if (!existing.opted_in || existing.status !== 'active') continue
       contactId = existing.id
+
+      // Only fill company if currently empty — never overwrite existing data
+      if (company && !existing.company) {
+        await supabase
+          .from('contacts')
+          .update({ company })
+          .eq('id', contactId)
+      }
     } else {
       // Admin is explicitly adding this email — auto opt-in (consent asserted by admin)
       const { data: created, error: createErr } = await supabase
         .from('contacts')
         .insert({
           email,
+          company,
           opted_in:    true,
           opted_in_at: now,
           status:      'active',

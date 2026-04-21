@@ -66,11 +66,11 @@ function parseCSV(text: string): ParsedRow[] {
 
 const VALID_TYPES = ['camping', 'sponsor', 'adverteerder', 'lid', 'partner', 'prospect', 'overig']
 
-export function ImportForm({ groups }: { groups: Group[] }) {
+export function ImportForm({ groups, defaultGroupId }: { groups: Group[]; defaultGroupId?: string }) {
   const fileRef = useRef<HTMLInputElement>(null)
   const [rows, setRows] = useState<ParsedRow[]>([])
   const [fileError, setFileError] = useState<string | null>(null)
-  const [selectedGroupId, setSelectedGroupId] = useState<string>('')
+  const [selectedGroupId, setSelectedGroupId] = useState<string>(defaultGroupId ?? '')
   const [state, formAction, isPending] = useActionState<ImportResult, FormData>(importContacts, null)
 
   const hasResult = state !== null && !isPending
@@ -122,10 +122,65 @@ export function ImportForm({ groups }: { groups: Group[] }) {
         <div className="rounded-lg border border-zinc-200 bg-white p-6 space-y-5">
           <h2 className="text-sm font-semibold text-zinc-700 uppercase tracking-wide">CSV-bestand</h2>
 
-          <p className="text-sm text-zinc-500">
-            Verwacht formaat: kolommen gescheiden door komma of puntkomma. De eerste kolom (of kolom met header <code className="font-mono bg-zinc-100 px-1 rounded">email</code>) bevat het e-mailadres.
-            Optionele extra kolommen: <code className="font-mono bg-zinc-100 px-1 rounded">first_name</code>, <code className="font-mono bg-zinc-100 px-1 rounded">last_name</code>, <code className="font-mono bg-zinc-100 px-1 rounded">company</code>, <code className="font-mono bg-zinc-100 px-1 rounded">contact_type</code>.
-          </p>
+          {/* Hoe moet de CSV eruitzien? */}
+          <div className="rounded-md border border-blue-200 bg-blue-50 p-4 space-y-3 text-sm">
+            <div>
+              <p className="font-semibold text-blue-900">Zo stel je je CSV samen</p>
+              <p className="mt-0.5 text-blue-800 text-xs">
+                Kolommen gescheiden door <strong>;</strong> (puntkomma) of <strong>,</strong> (komma). Eerste regel bevat de kolomnamen.
+              </p>
+            </div>
+
+            <div className="overflow-x-auto rounded-md border border-blue-200 bg-white">
+              <table className="w-full text-xs">
+                <thead className="bg-blue-100/70 text-blue-900">
+                  <tr>
+                    <th className="px-3 py-1.5 text-left font-semibold">Kolomnaam</th>
+                    <th className="px-3 py-1.5 text-left font-semibold">Variabele in template</th>
+                    <th className="px-3 py-1.5 text-left font-semibold">Verplicht</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-blue-100 text-blue-900">
+                  <tr>
+                    <td className="px-3 py-1.5 font-mono">email</td>
+                    <td className="px-3 py-1.5 font-mono">{'{{email}}'}</td>
+                    <td className="px-3 py-1.5">Ja</td>
+                  </tr>
+                  <tr>
+                    <td className="px-3 py-1.5 font-mono">first_name <span className="text-blue-500">(of voornaam)</span></td>
+                    <td className="px-3 py-1.5 font-mono">{'{{first_name}}'}</td>
+                    <td className="px-3 py-1.5">Nee</td>
+                  </tr>
+                  <tr>
+                    <td className="px-3 py-1.5 font-mono">last_name <span className="text-blue-500">(of achternaam)</span></td>
+                    <td className="px-3 py-1.5 font-mono">{'{{last_name}}'}</td>
+                    <td className="px-3 py-1.5">Nee</td>
+                  </tr>
+                  <tr>
+                    <td className="px-3 py-1.5 font-mono">company <span className="text-blue-500">(of bedrijf)</span></td>
+                    <td className="px-3 py-1.5 font-mono">{'{{company_name}}'}</td>
+                    <td className="px-3 py-1.5">Nee</td>
+                  </tr>
+                  <tr>
+                    <td className="px-3 py-1.5 font-mono">contact_type <span className="text-blue-500">(of type)</span></td>
+                    <td className="px-3 py-1.5 text-blue-500">— (sortering)</td>
+                    <td className="px-3 py-1.5">Nee</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div>
+              <p className="font-semibold text-blue-900 text-xs">Voorbeeld</p>
+              <pre className="mt-1 rounded bg-white/80 border border-blue-200 p-2 text-[11px] font-mono text-blue-900 overflow-x-auto">{`company;first_name;last_name;email
+Acme Tenten;Jan;de Vries;jan@acme.nl
+Boertje Glamp;;;info@boertje.nl
+;Piet;;piet@example.com`}</pre>
+              <p className="mt-1 text-[11px] text-blue-700">
+                Lege kolommen mogen. De volgorde van de kolommen maakt niet uit, zolang de kopregel klopt.
+              </p>
+            </div>
+          </div>
 
           <div>
             <label

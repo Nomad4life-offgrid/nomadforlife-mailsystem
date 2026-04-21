@@ -68,6 +68,17 @@ export default async function SegmentsPage({
             Nieuw segment
           </Link>
         )}
+        {tab === 'lijsten' && (
+          <Link
+            href="/contacts/import"
+            className="inline-flex items-center gap-2 rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-700 transition-colors"
+          >
+            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+            </svg>
+            CSV importeren
+          </Link>
+        )}
       </div>
 
       {/* Tabs */}

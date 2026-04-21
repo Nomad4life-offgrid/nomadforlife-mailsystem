@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef, useState } from 'react'
+import { useState } from 'react'
 import { subscribeGroup, subscribeContacts } from './actions'
 
 type Campaign = {
@@ -24,34 +24,29 @@ function isFunnel(campaigns: Campaign[], id: string) {
 function localNow() {
   const d = new Date()
   d.setSeconds(0, 0)
-  return d.toISOString().slice(0, 16)
+  // Strip timezone offset to format for datetime-local input in local time
+  const tzMs = d.getTimezoneOffset() * 60_000
+  return new Date(d.getTime() - tzMs).toISOString().slice(0, 16)
 }
 
-/** Wraps form submission: reads datetime-local value, converts to UTC ISO, injects hidden field */
-function withStartAt(action: (fd: FormData) => Promise<void>) {
-  return async (fd: FormData) => {
-    const localVal = fd.get('start_at_local') as string | null
-    if (localVal) {
-      // datetime-local value has no timezone — interpret as local time
-      const utcIso = new Date(localVal).toISOString()
-      fd.set('start_at', utcIso)
-    }
-    fd.delete('start_at_local')
-    await action(fd)
-  }
+/** Converts a local datetime-local string (YYYY-MM-DDTHH:MM) to a UTC ISO string. */
+function toUtcIso(local: string) {
+  if (!local) return ''
+  return new Date(local).toISOString()
 }
 
 // ── Segment form ──────────────────────────────────────────────────────────────
 
 export function SegmentForm({ campaigns, groups }: { campaigns: Campaign[]; groups: Group[] }) {
-  const [campaignId, setCampaignId] = useState('')
+  const [campaignId, setCampaignId]       = useState('')
+  const [startAtLocal, setStartAtLocal]   = useState(localNow())
   const showDate = isFunnel(campaigns, campaignId)
-  const defaultDate = useRef(localNow())
-
-  const action = withStartAt(subscribeGroup)
 
   return (
-    <form action={action} className="p-6 space-y-4">
+    <form action={subscribeGroup} className="p-6 space-y-4">
+      {/* Hidden UTC-ISO start_at — only relevant for funnels */}
+      {showDate && <input type="hidden" name="start_at" value={toUtcIso(startAtLocal)} />}
+
       <div className="grid grid-cols-2 gap-4">
         <div>
           <label className="block text-xs font-medium text-zinc-600 mb-1.5">
@@ -92,9 +87,9 @@ export function SegmentForm({ campaigns, groups }: { campaigns: Campaign[]; grou
             <span className="ml-1.5 font-normal text-zinc-400">(Stap 1 wordt verstuurd op dit moment)</span>
           </label>
           <input
-            name="start_at_local"
             type="datetime-local"
-            defaultValue={defaultDate.current}
+            value={startAtLocal}
+            onChange={(e) => setStartAtLocal(e.target.value)}
             className="block rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm focus:border-zinc-500 focus:outline-none"
           />
           <p className="mt-1 text-xs text-zinc-400">
@@ -116,14 +111,14 @@ export function SegmentForm({ campaigns, groups }: { campaigns: Campaign[]; grou
 // ── Email form ────────────────────────────────────────────────────────────────
 
 export function EmailForm({ campaigns }: { campaigns: Campaign[] }) {
-  const [campaignId, setCampaignId] = useState('')
+  const [campaignId, setCampaignId]     = useState('')
+  const [startAtLocal, setStartAtLocal] = useState(localNow())
   const showDate = isFunnel(campaigns, campaignId)
-  const defaultDate = useRef(localNow())
-
-  const action = withStartAt(subscribeContacts)
 
   return (
-    <form action={action} className="p-6 space-y-4">
+    <form action={subscribeContacts} className="p-6 space-y-4">
+      {showDate && <input type="hidden" name="start_at" value={toUtcIso(startAtLocal)} />}
+
       <div>
         <label className="block text-xs font-medium text-zinc-600 mb-1.5">
           Campagne <span className="text-red-500">*</span>
@@ -143,6 +138,27 @@ export function EmailForm({ campaigns }: { campaigns: Campaign[] }) {
           ))}
         </select>
       </div>
+
+      {/* Instructiekader personalisatie */}
+      <div className="rounded-md border border-blue-200 bg-blue-50 px-4 py-3 text-xs text-blue-900">
+        <p className="font-semibold mb-1">Formaat per regel</p>
+        <ul className="space-y-0.5">
+          <li>
+            <code className="font-mono bg-white/70 px-1 rounded">email@voorbeeld.nl</code>
+            <span className="text-blue-700"> — alleen e-mail (geen bedrijfsnaam)</span>
+          </li>
+          <li>
+            <code className="font-mono bg-white/70 px-1 rounded">Bedrijfsnaam;email@voorbeeld.nl</code>
+            <span className="text-blue-700"> — bedrijfsnaam vóór de puntkomma, e-mail erachter</span>
+          </li>
+        </ul>
+        <p className="mt-2 text-blue-700">
+          De bedrijfsnaam wordt opgeslagen op het contact en automatisch gebruikt waar
+          {' '}<code className="font-mono bg-white/70 px-1 rounded">{'{{company_name}}'}</code>{' '}
+          in de template staat.
+        </p>
+      </div>
+
       <div>
         <label className="block text-xs font-medium text-zinc-600 mb-1.5">
           E-mailadressen <span className="text-red-500">*</span>
@@ -151,9 +167,12 @@ export function EmailForm({ campaigns }: { campaigns: Campaign[] }) {
           name="emails"
           rows={5}
           required
-          placeholder={'jan@example.com\npiet@example.com'}
+          placeholder={'Acme Tenten;info@acme.nl\nBoertje Glamp;marijn@boertje.nl\njan@example.com'}
           className="block w-full rounded-md border border-zinc-300 px-3 py-2 font-mono text-sm focus:border-zinc-500 focus:outline-none"
         />
+        <p className="mt-1 text-xs text-zinc-400">
+          Eén contact per regel. Nieuwe contacten worden automatisch aangemaakt en opt-in gezet.
+        </p>
       </div>
 
       {showDate && (
@@ -163,9 +182,9 @@ export function EmailForm({ campaigns }: { campaigns: Campaign[] }) {
             <span className="ml-1.5 font-normal text-zinc-400">(Stap 1 wordt verstuurd op dit moment)</span>
           </label>
           <input
-            name="start_at_local"
             type="datetime-local"
-            defaultValue={defaultDate.current}
+            value={startAtLocal}
+            onChange={(e) => setStartAtLocal(e.target.value)}
             className="block rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm focus:border-zinc-500 focus:outline-none"
           />
           <p className="mt-1 text-xs text-zinc-400">

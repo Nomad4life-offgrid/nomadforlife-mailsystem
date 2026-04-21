@@ -190,9 +190,32 @@ export default async function GroupDetailPage({
 
         {/* Sidebar */}
         <div className="space-y-4">
+          {/* CSV importeren */}
+          <div>
+            <h2 className="text-sm font-semibold text-zinc-700 mb-3">CSV importeren</h2>
+            <div className="rounded-xl border border-zinc-200 bg-white p-5 space-y-3">
+              <p className="text-xs text-zinc-500">
+                Upload een CSV-bestand om meerdere contacten tegelijk toe te voegen aan deze lijst.
+                Kolommen zoals <code className="font-mono bg-zinc-100 px-1 rounded">company</code> en
+                {' '}<code className="font-mono bg-zinc-100 px-1 rounded">first_name</code> worden gebruikt
+                voor personalisatie (<code className="font-mono bg-zinc-100 px-1 rounded">{'{{company_name}}'}</code>,
+                {' '}<code className="font-mono bg-zinc-100 px-1 rounded">{'{{first_name}}'}</code>).
+              </p>
+              <Link
+                href={`/contacts/import?group_id=${id}`}
+                className="inline-flex w-full items-center justify-center gap-2 rounded-md bg-zinc-900 py-2 text-sm font-medium text-white hover:bg-zinc-700 transition-colors"
+              >
+                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+                </svg>
+                CSV uploaden
+              </Link>
+            </div>
+          </div>
+
           {/* Contact toevoegen */}
           <div>
-            <h2 className="text-sm font-semibold text-zinc-700 mb-3">Contact toevoegen</h2>
+            <h2 className="text-sm font-semibold text-zinc-700 mb-3">Los contact toevoegen</h2>
             <form action={addFn as unknown as (fd: FormData) => Promise<void>} className="rounded-xl border border-zinc-200 bg-white p-5 space-y-3">
               <select
                 name="contact_id"
