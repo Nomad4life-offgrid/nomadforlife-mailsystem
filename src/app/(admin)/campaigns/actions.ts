@@ -318,7 +318,14 @@ export async function sendCampaign(id: string) {
   const now         = new Date()
   const scheduledAt = now.toISOString()
 
-  // 4. Campaign_runs + mail_logs aanmaken
+  // 4a. Status meteen op 'sending' zodat een gelijktijdige "Verwerk wachtrij"-klik
+  // de logs niet ten onrechte als 'skipped' markeert (campagne moet 'sending'/'active' zijn).
+  await supabase
+    .from('campaigns')
+    .update({ status: 'sending', sent_at: now.toISOString() })
+    .eq('id', id)
+
+  // 4b. Campaign_runs + mail_logs aanmaken
   let successCount = 0
 
   for (const contact of audience.contacts) {
@@ -348,14 +355,10 @@ export async function sendCampaign(id: string) {
     successCount++
   }
 
-  // 5. Campagne bijwerken
+  // 5. Recipient count vastleggen (status is al op 'sending' gezet in stap 4a)
   await supabase
     .from('campaigns')
-    .update({
-      status:          'sending',
-      sent_at:         now.toISOString(),
-      recipient_count: successCount,
-    })
+    .update({ recipient_count: successCount })
     .eq('id', id)
 
   // 6. Direct verzenden — voorkomt dat we op een cron moeten wachten.
