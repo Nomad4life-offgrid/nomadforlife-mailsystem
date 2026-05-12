@@ -57,20 +57,33 @@ export function TestMailForm({ templates }: { templates: Template[] }) {
         />
       </div>
 
-      <div>
-        <label className="block text-xs font-medium text-zinc-600 mb-1">
-          Scenario <span className="text-zinc-400 font-normal">(vult merge-velden zoals {'{{branche_zin}}'}, {'{{bedrijfsnaam}}'}, {'{{ps_offgrid}}'})</span>
-        </label>
-        <select
-          name="scenario"
-          defaultValue=""
-          className="block w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm focus:border-zinc-500 focus:outline-none"
-        >
-          <option value="">Geen — alleen standaardvariabelen</option>
-          {TEST_SCENARIOS.map((s) => (
-            <option key={s.key} value={s.key}>{s.label}</option>
-          ))}
-        </select>
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <label className="block text-xs font-medium text-zinc-600 mb-1">
+            Scenario <span className="text-zinc-400 font-normal">(branche_zin, ps_offgrid)</span>
+          </label>
+          <select
+            name="scenario"
+            defaultValue=""
+            className="block w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm focus:border-zinc-500 focus:outline-none"
+          >
+            <option value="">Geen — standaardvariabelen</option>
+            {TEST_SCENARIOS.map((s) => (
+              <option key={s.key} value={s.key}>{s.label}</option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <label className="block text-xs font-medium text-zinc-600 mb-1">
+            Bedrijfsnaam <span className="text-zinc-400 font-normal">(override aanhef + {'{{bedrijfsnaam}}'})</span>
+          </label>
+          <input
+            type="text"
+            name="bedrijfsnaam"
+            placeholder="bv. Mijn Camperbedrijf"
+            className="block w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm focus:border-zinc-500 focus:outline-none"
+          />
+        </div>
       </div>
 
       <div className="flex items-center gap-3">

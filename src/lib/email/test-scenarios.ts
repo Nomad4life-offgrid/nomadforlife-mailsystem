@@ -5,20 +5,20 @@
  */
 
 const PS_OFFGRID =
-  "P.S. Specifiek voor off-grid: deze categorie blijkt onze meest gevraagde, en we houden het aantal vermeldingen per sub-categorie (stroom, water, accu's, zonnepanelen, accessoires) bewust beperkt. Op die manier valt iedere partner op in plaats van te verdrinken in een rij logo's. Een paar plekken zijn inmiddels toegezegd — fijn als we elkaar snel kunnen spreken om te kijken of er voor jullie nog een goede positie tussen zit."
+  "P.S. Specifiek voor off-grid: deze categorie blijkt onze meest gevraagde, en we houden het aantal vermeldingen per sub-categorie (stroom, water, accu's, zonnepanelen, accessoires) bewust beperkt. Op die manier valt iedere partner op in plaats van te verdrinken in een rij logo's. Een paar plekken zijn inmiddels toegezegd, fijn als we elkaar snel kunnen spreken om te kijken of er voor jullie nog een goede positie tussen zit."
 
-const SUBJ_FOUNDING = 'Founding Partner van Nomad4Life — eerste jaar kosteloos'
+const SUBJ_FOUNDING = 'Founding Partner van Nomad4Life, eerste jaar kosteloos'
 const SUBJ_SAMENW   = 'Samenwerking Nomad4Life: nieuw platform voor camperaars'
-const SUBJ_VOORSTEL = 'Voorstel partnerprogramma — Nomad4Life (camper- en vanlife-platform)'
+const SUBJ_VOORSTEL = 'Voorstel partnerprogramma, Nomad4Life (camper- en vanlife-platform)'
 
 const ZIN: Record<string, string> = {
-  'off-grid':     "autonoom reizen — stroom, water, accu's, zonnepanelen en alles wat je nodig hebt om los te komen van het net. Dat is precies waar onze community de hele dag mee bezig is.",
-  inbouw:         'professionele camperinbouw. Vakwerk dat een leven lang meegaat is voor onze leden geen luxe maar het uitgangspunt — en daar passen jullie precies bij.',
-  verhuur:        'het huren van een camper of bus. Veel van onze leden beginnen hun reis met huren voordat ze investeren — en goede verhuurders zijn dan goud waard.',
+  'off-grid':     "autonoom reizen, stroom, water, accu's, zonnepanelen en alles wat je nodig hebt om los te komen van het net. Dat is precies waar onze community de hele dag mee bezig is.",
+  inbouw:         'professionele camperinbouw. Vakwerk dat een leven lang meegaat is voor onze leden geen luxe maar het uitgangspunt, en daar passen jullie precies bij.',
+  verhuur:        'het huren van een camper of bus. Veel van onze leden beginnen hun reis met huren voordat ze investeren, en goede verhuurders zijn dan goud waard.',
   aanschaf:       'het kopen van hun eerste of volgende camper. Dat is voor de meesten een serieuze investering, en betrouwbare aanbieders maken het verschil.',
   keuring:        'APK en camperkeuring. Onze leden willen veilig op pad, en goede keuringsbedrijven die de camperwereld kennen zijn schaarser dan je zou denken.',
-  verzekeringen:  'verzekeringen voor onderweg. Een passende, eerlijke camperverzekering is niet vanzelfsprekend — onze leden vragen er regelmatig naar.',
-  multi:          'camper- en vanlife-oplossingen die meerdere kanten op gaan. Dat brede aanbod is precies wat onze veelzijdige community waardeert — onze leden hebben aan één partij vaak meer dan genoeg.',
+  verzekeringen:  'verzekeringen voor onderweg. Een passende, eerlijke camperverzekering is niet vanzelfsprekend, onze leden vragen er regelmatig naar.',
+  multi:          'camper- en vanlife-oplossingen die meerdere kanten op gaan. Dat brede aanbod is precies wat onze veelzijdige community waardeert, onze leden hebben aan één partij vaak meer dan genoeg.',
 }
 
 const CAT = (slug: string) => `https://www.nomad4life.com/campers-vans/${slug}`
@@ -134,7 +134,7 @@ export const TEST_SCENARIOS: TestScenario[] = [
   },
   {
     key:   'multi-inbouw-offgrid',
-    label: 'Multi — Inbouw + Off-grid',
+    label: 'Multi, Inbouw + Off-grid',
     customFields: {
       bedrijfsnaam:  'Aart Camperinbouw',
       aanhef:        'Hallo Aart Camperinbouw,',
@@ -146,12 +146,12 @@ export const TEST_SCENARIOS: TestScenario[] = [
       branche_zin:   ZIN.multi,
       categorie_url: CAT('inbouw'),
       ps_offgrid:    PS_OFFGRID,
-      preheader:     'Brede expertise — precies wat onze veelzijdige community zoekt.',
+      preheader:     'Brede expertise, precies wat onze veelzijdige community zoekt.',
     },
   },
   {
     key:   'multi-keuring-verzekeringen',
-    label: 'Multi — Keuring + Verzekeringen',
+    label: 'Multi, Keuring + Verzekeringen',
     customFields: {
       bedrijfsnaam:  'Camperverzekerd',
       aanhef:        'Hallo Camperverzekerd,',
@@ -163,12 +163,12 @@ export const TEST_SCENARIOS: TestScenario[] = [
       branche_zin:   ZIN.multi,
       categorie_url: CAT('keuring'),
       ps_offgrid:    '',
-      preheader:     'Brede expertise — precies wat onze veelzijdige community zoekt.',
+      preheader:     'Brede expertise, precies wat onze veelzijdige community zoekt.',
     },
   },
   {
     key:   'multi-aanschaf-verhuur',
-    label: 'Multi — Aanschaf + Verhuur',
+    label: 'Multi, Aanschaf + Verhuur',
     customFields: {
       bedrijfsnaam:  'Dicar Motorhomes',
       aanhef:        'Hallo Dicar Motorhomes,',
@@ -180,12 +180,12 @@ export const TEST_SCENARIOS: TestScenario[] = [
       branche_zin:   ZIN.multi,
       categorie_url: CAT('aanschaf'),
       ps_offgrid:    '',
-      preheader:     'Brede expertise — precies wat onze veelzijdige community zoekt.',
+      preheader:     'Brede expertise, precies wat onze veelzijdige community zoekt.',
     },
   },
   {
     key:   'multi-inbouw-keuring',
-    label: 'Multi — Inbouw + Keuring',
+    label: 'Multi, Inbouw + Keuring',
     customFields: {
       bedrijfsnaam:  'Mees Camper Center',
       aanhef:        'Hallo Mees Camper Center,',
@@ -197,7 +197,7 @@ export const TEST_SCENARIOS: TestScenario[] = [
       branche_zin:   ZIN.multi,
       categorie_url: CAT('inbouw'),
       ps_offgrid:    '',
-      preheader:     'Brede expertise — precies wat onze veelzijdige community zoekt.',
+      preheader:     'Brede expertise, precies wat onze veelzijdige community zoekt.',
     },
   },
 ]
