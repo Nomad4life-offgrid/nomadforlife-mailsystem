@@ -57,6 +57,14 @@ export function CampaignForm({
   const [audienceType, setAudienceType] = useState<'group' | 'segment'>(
     defaultValues?.audience_type ?? 'group'
   )
+  const [selectedTemplateId, setSelectedTemplateId] = useState<string>(
+    defaultValues?.template_id ?? ''
+  )
+  const [overrideSubject, setOverrideSubject] = useState<boolean>(
+    Boolean(defaultValues?.subject || defaultValues?.preview_text),
+  )
+  const selectedTemplate = templates.find((t) => t.id === selectedTemplateId) ?? null
+  const subjectFromTemplate = !overrideSubject && !!selectedTemplate
 
   const inputCls = (hasErr: boolean) =>
     `mt-1 block w-full rounded-md border px-3 py-2 text-sm focus:outline-none focus:border-zinc-500 ${
@@ -154,33 +162,78 @@ export function CampaignForm({
         <div className="rounded-lg border border-zinc-200 bg-white p-6 space-y-4">
           <h2 className="text-sm font-semibold text-zinc-700 uppercase tracking-wide">E-mailinstellingen</h2>
 
-          <div>
-            <label className="block text-sm font-medium text-zinc-700" htmlFor="subject">
-              Onderwerpregel <span className="text-red-500">*</span>
-            </label>
-            <input
-              id="subject" name="subject" type="text"
-              defaultValue={defaultValues?.subject ?? ''}
-              placeholder="Bijv. Nieuw aanbod voor campingleden"
-              className={inputCls(!!errors?.subject)}
-            />
-            <FieldError msgs={errors?.subject} />
-          </div>
+          {subjectFromTemplate ? (
+            <>
+              <div className="rounded-md border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm space-y-1.5">
+                <p className="text-zinc-700">
+                  <span className="font-medium">Onderwerp uit template:</span>{' '}
+                  <code className="font-mono text-zinc-900 bg-white border border-zinc-300 px-1.5 py-0.5 rounded text-xs">
+                    {selectedTemplate?.subject || '—'}
+                  </code>
+                </p>
+                <p className="text-xs text-zinc-500">
+                  Variabelen zoals <code className="font-mono bg-white border border-zinc-300 px-1 rounded">{'{{onderwerp}}'}</code> worden per contact ingevuld.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setOverrideSubject(true)}
+                className="text-xs font-medium text-zinc-600 underline hover:text-zinc-900"
+              >
+                Onderwerp/preheader voor deze campagne overschrijven
+              </button>
+              {/* Lege hidden inputs zodat backend weet dat er geen override is */}
+              <input type="hidden" name="subject"      value="" />
+              <input type="hidden" name="preview_text" value="" />
+            </>
+          ) : (
+            <>
+              {selectedTemplate && (
+                <div className="flex items-start justify-between gap-3 rounded-md border border-amber-200 bg-amber-50 px-4 py-2.5 text-xs text-amber-800">
+                  <span>
+                    Override actief — template-onderwerp{' '}
+                    <code className="font-mono bg-white border border-amber-300 px-1 rounded">{selectedTemplate.subject || '—'}</code>{' '}
+                    wordt voor deze campagne genegeerd.
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setOverrideSubject(false)}
+                    className="font-medium underline hover:text-amber-900 shrink-0"
+                  >
+                    Gebruik template-onderwerp
+                  </button>
+                </div>
+              )}
 
-          <div>
-            <label className="block text-sm font-medium text-zinc-700" htmlFor="preview_text">
-              Preview-tekst
-            </label>
-            <input
-              id="preview_text" name="preview_text" type="text"
-              defaultValue={defaultValues?.preview_text ?? ''}
-              placeholder="Korte tekst zichtbaar naast de onderwerpregel in de inbox"
-              className={inputCls(false)}
-            />
-            <p className="mt-1 text-xs text-zinc-400">
-              Preheader-tekst — max. ~90 tekens voor de meeste e-mailclients.
-            </p>
-          </div>
+              <div>
+                <label className="block text-sm font-medium text-zinc-700" htmlFor="subject">
+                  Onderwerpregel {!selectedTemplate && <span className="text-red-500">*</span>}
+                </label>
+                <input
+                  id="subject" name="subject" type="text"
+                  defaultValue={defaultValues?.subject ?? ''}
+                  placeholder="Bijv. Nieuw aanbod voor campingleden"
+                  className={inputCls(!!errors?.subject)}
+                />
+                <FieldError msgs={errors?.subject} />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-zinc-700" htmlFor="preview_text">
+                  Preview-tekst
+                </label>
+                <input
+                  id="preview_text" name="preview_text" type="text"
+                  defaultValue={defaultValues?.preview_text ?? ''}
+                  placeholder="Korte tekst zichtbaar naast de onderwerpregel in de inbox"
+                  className={inputCls(false)}
+                />
+                <p className="mt-1 text-xs text-zinc-400">
+                  Preheader-tekst — max. ~90 tekens voor de meeste e-mailclients.
+                </p>
+              </div>
+            </>
+          )}
         </div>
       )}
 
@@ -239,7 +292,8 @@ export function CampaignForm({
             </label>
             <select
               id="template_id" name="template_id"
-              defaultValue={defaultValues?.template_id ?? ''}
+              value={selectedTemplateId}
+              onChange={(e) => setSelectedTemplateId(e.target.value)}
               className={inputCls(!!errors?.template_id)}
             >
               <option value="">Kies een template…</option>
