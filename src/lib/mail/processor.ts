@@ -69,6 +69,7 @@ type ContactRow = {
   first_name:     string | null
   last_name:      string | null
   company:        string | null
+  custom_fields:  Record<string, unknown> | null
   global_opt_out: boolean
   bounced_at:     string | null
 }
@@ -127,7 +128,7 @@ export async function processBatch(
     .from('mail_logs')
     .select(`
       id, retry_count, campaign_run_id, campaign_step_id, contact_id,
-      contacts ( id, email, first_name, last_name, company, global_opt_out, bounced_at ),
+      contacts ( id, email, first_name, last_name, company, custom_fields, global_opt_out, bounced_at ),
       campaign_steps (
         id, subject, subject_override,
         templates ( subject, html_body, text_body ),

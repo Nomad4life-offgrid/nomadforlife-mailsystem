@@ -24,7 +24,7 @@ export type MailPayload = {
 }
 
 export function buildMailPayload(opts: {
-  contact:      { email: string; first_name: string | null; last_name: string | null }
+  contact:      { email: string; first_name: string | null; last_name: string | null; custom_fields?: Record<string, unknown> | null }
   template:     { subject: string; html_body: string; text_body: string | null }
   campaign:     { from_email: string; from_name: string; name?: string }
   companyName?: string
@@ -32,6 +32,7 @@ export function buildMailPayload(opts: {
   unsubscribePostUrl: string
 }): MailPayload {
   const { contact, template, campaign, companyName, unsubscribeUrl, unsubscribePostUrl } = opts
+  const customFields = contact.custom_fields ?? null
 
   const { html, text } = renderEmail({
     htmlBody:       template.html_body,
@@ -40,6 +41,7 @@ export function buildMailPayload(opts: {
     campaignName:   campaign.name,
     companyName,
     unsubscribeUrl,
+    customFields,
   })
 
   // Subject kan ook variabelen bevatten — substitueer apart (geen footer)
@@ -51,6 +53,7 @@ export function buildMailPayload(opts: {
     companyName,
     unsubscribeUrl,
     appendFooter:   false,
+    customFields,
   })
 
   const subject = sanitizeSubject(subjectHtml)

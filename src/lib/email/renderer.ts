@@ -56,10 +56,20 @@ export const SAMPLE_VARS: TemplateVarMap = {
  * Vervangt alle {{key}} placeholders in de string.
  * Onbekende of ontbrekende keys worden vervangen door een lege string.
  */
-export function substituteVars(template: string, vars: Partial<TemplateVarMap>): string {
-  return template.replace(/\{\{(\w+)\}\}/g, (_, key: string) =>
-    vars[key as keyof TemplateVarMap] ?? ''
-  )
+export function substituteVars(
+  template: string,
+  vars: Partial<TemplateVarMap>,
+  customFields?: Record<string, unknown> | null,
+): string {
+  return template.replace(/\{\{(\w+)\}\}/g, (_, key: string) => {
+    const builtIn = vars[key as keyof TemplateVarMap]
+    if (builtIn !== undefined) return builtIn
+    if (customFields && Object.prototype.hasOwnProperty.call(customFields, key)) {
+      const v = customFields[key]
+      return v == null ? '' : String(v)
+    }
+    return ''
+  })
 }
 
 // ── HTML → tekst ──────────────────────────────────────────────────────────────
@@ -141,6 +151,8 @@ export function renderEmail(opts: {
   unsubscribeUrl: string
   /** Zet op false om de footer weg te laten (bijv. bij subject-rendering). Default: true. */
   appendFooter?:  boolean
+  /** Extra per-contact merge-velden uit contacts.custom_fields. Built-in vars hebben voorrang. */
+  customFields?:  Record<string, unknown> | null
 }): { html: string; text: string } {
   const firstName = opts.contact.first_name?.trim() ?? ''
   const lastName  = opts.contact.last_name?.trim()  ?? ''
@@ -161,7 +173,7 @@ export function renderEmail(opts: {
 
   const FOOTER_TEXT = `\n\n--\nTeam Nomad For Life\nhttps://nomad4life.com`
 
-  const bodyHtml = substituteVars(opts.htmlBody, vars) + (withFooter ? FOOTER_HTML : '')
+  const bodyHtml = substituteVars(opts.htmlBody, vars, opts.customFields) + (withFooter ? FOOTER_HTML : '')
 
   // Buttons: alle <a>-tags met background(-color) in hun style krijgen geforceerde
   // kernstijlen. De tekst wordt in een <span> gewikkeld zodat e-mailclients
@@ -194,7 +206,7 @@ export function renderEmail(opts: {
     ? styledBody
     : `<div style="background-color:#000000;color:#ffffff;text-align:left;padding:40px 0">${styledBody}</div>`
   const rawText = opts.textBody ? opts.textBody : htmlToText(opts.htmlBody)
-  const text    = substituteVars(rawText, vars) + (withFooter ? FOOTER_TEXT : '')
+  const text    = substituteVars(rawText, vars, opts.customFields) + (withFooter ? FOOTER_TEXT : '')
 
   return { html, text }
 }
