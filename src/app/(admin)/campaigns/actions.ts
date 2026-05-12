@@ -7,6 +7,7 @@ import { resolveAudienceContacts } from '@/lib/services/audience'
 import { CampaignSchema, UpdateCampaignSchema } from '@/lib/validations/campaign'
 import { requireAdmin, requireEditor } from '@/lib/auth/guards'
 import { htmlToText } from '@/lib/email/renderer'
+import { processBatch } from '@/lib/mail/processor'
 import type { Campaign } from '@/types'
 
 /** Subjects moeten platte tekst zijn — strip HTML en flatten whitespace. */
@@ -357,8 +358,26 @@ export async function sendCampaign(id: string) {
     })
     .eq('id', id)
 
+  // 6. Direct verzenden — voorkomt dat we op een cron moeten wachten.
+  // Verwerkt tot 500 mail_logs voor deze campagne. Bij grotere lijsten
+  // pikt de cron de rest op.
+  let batchInfo: { sent: number; failed: number; skipped: number } | null = null
+  try {
+    const result = await processBatch(supabase, { campaignId: id, limit: 500 })
+    batchInfo = { sent: result.sent, failed: result.failed, skipped: result.skipped }
+  } catch (err) {
+    console.error('[sendCampaign] direct verzenden mislukt:', err)
+  }
+
   revalidatePath(`/campaigns/${id}`)
   revalidatePath('/campaigns')
+
+  if (batchInfo) {
+    const info = encodeURIComponent(
+      `Verstuurd: ${batchInfo.sent} • Mislukt: ${batchInfo.failed} • Overgeslagen: ${batchInfo.skipped}`,
+    )
+    redirect(`/campaigns/${id}?info=${info}`)
+  }
   redirect(`/campaigns/${id}`)
 }
 
