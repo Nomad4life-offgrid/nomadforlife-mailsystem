@@ -1,8 +1,8 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
-import { ContactStatusBadge } from '@/components/ui/Badge'
-import { addContactToGroup, removeContactFromGroup } from '../actions'
+import { addContactToGroup } from '../actions'
+import { MembersTable } from './MembersTable'
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -121,71 +121,23 @@ export default async function GroupDetailPage({
             )}
           </form>
 
-          <div className="overflow-hidden rounded-xl border border-zinc-200 bg-white">
-            <table className="w-full text-sm">
-              <thead className="border-b border-zinc-100 bg-zinc-50">
-                <tr>
-                  <th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-zinc-400">Contact</th>
-                  <th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-zinc-400">Status</th>
-                  <th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-zinc-400">Toegevoegd</th>
-                  <th className="px-5 py-3" />
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-zinc-100">
-                {displayedMembers.length === 0 && (
-                  <tr>
-                    <td colSpan={4} className="px-5 py-10 text-center text-sm text-zinc-400">
-                      {q ? `Geen resultaten voor "${q}".` : 'Nog geen contacten in deze lijst.'}
-                    </td>
-                  </tr>
-                )}
-                {displayedMembers.map((m) => {
-                  const c = m.contacts as unknown as {
-                    id: string; email: string; first_name: string | null
-                    last_name: string | null; status: string; opted_in: boolean
-                  } | null
-                  const removeFn = removeContactFromGroup.bind(null, id, m.contact_id)
-                  const name     = [c?.first_name, c?.last_name].filter(Boolean).join(' ')
-
-                  return (
-                    <tr key={m.contact_id} className="group hover:bg-zinc-50 transition-colors">
-                      <td className="px-5 py-3.5">
-                        <Link
-                          href={`/contacts/${m.contact_id}`}
-                          className="font-mono text-xs text-zinc-700 hover:underline"
-                        >
-                          {c?.email ?? '—'}
-                        </Link>
-                        {name && <p className="text-xs text-zinc-400 mt-0.5">{name}</p>}
-                      </td>
-                      <td className="px-5 py-3.5">
-                        {c && (
-                          <div className="flex items-center gap-1.5">
-                            <ContactStatusBadge status={c.status as any} />
-                            {!c.opted_in && (
-                              <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-700">
-                                Niet opted-in
-                              </span>
-                            )}
-                          </div>
-                        )}
-                      </td>
-                      <td className="px-5 py-3.5 text-xs text-zinc-400">
-                        {new Date(m.added_at).toLocaleDateString('nl-NL')}
-                      </td>
-                      <td className="px-5 py-3.5 text-right">
-                        <form action={removeFn} className="inline opacity-0 group-hover:opacity-100 transition-opacity">
-                          <button type="submit" className="text-xs text-red-400 hover:text-red-600">
-                            Verwijder
-                          </button>
-                        </form>
-                      </td>
-                    </tr>
-                  )
-                })}
-              </tbody>
-            </table>
-          </div>
+          {q && displayedMembers.length === 0 ? (
+            <div className="rounded-xl border border-zinc-200 bg-white px-5 py-10 text-center text-sm text-zinc-400">
+              Geen resultaten voor &quot;{q}&quot;.
+            </div>
+          ) : (
+            <MembersTable
+              groupId={id}
+              members={displayedMembers.map((m) => ({
+                contact_id: m.contact_id,
+                added_at:   m.added_at,
+                contact:    m.contacts as unknown as {
+                  id: string; email: string; first_name: string | null
+                  last_name: string | null; status: string; opted_in: boolean
+                } | null,
+              }))}
+            />
+          )}
         </div>
 
         {/* Sidebar */}

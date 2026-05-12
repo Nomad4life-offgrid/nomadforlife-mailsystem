@@ -127,6 +127,28 @@ export async function removeContactFromGroup(groupId: string, contactId: string)
   revalidatePath(`/segments/${groupId}`)
 }
 
+export async function removeContactsFromGroupBulk(
+  groupId: string,
+  contactIds: string[],
+): Promise<{ removed: number }> {
+  await requireEditor()
+  if (!groupId) throw new Error('Groep ID ontbreekt.')
+  if (!contactIds || contactIds.length === 0) return { removed: 0 }
+
+  const supabase = createServiceClient()
+  const { data, error } = await supabase
+    .from('contact_group_members')
+    .delete()
+    .eq('group_id', groupId)
+    .in('contact_id', contactIds)
+    .select('contact_id')
+
+  if (error) throw new Error(error.message)
+
+  revalidatePath(`/segments/${groupId}`)
+  return { removed: data?.length ?? 0 }
+}
+
 // ── Dynamic segments ──────────────────────────────────────────────────────────
 
 export async function createSegment(
