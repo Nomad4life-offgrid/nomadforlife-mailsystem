@@ -70,7 +70,7 @@ Wat dat het eerste jaar concreet oplevert:
 </p>
 
 <ul style="margin:0 0 24px 20px;padding:0;font-size:14px;line-height:1.6;font-weight:400;">
-<li style="margin-bottom:8px;font-size:14px;line-height:1.6;">Permanente vermelding op de relevante <a href="{{categorie_url}}" style="color:${ORANGE};text-decoration:underline;">categoriepagina</a></li>
+<li style="margin-bottom:8px;font-size:14px;line-height:1.6;">Permanente vermelding op de relevante <a href="{{categorie_url}}" style="color:${ORANGE};font-size:14px;line-height:1.6;text-decoration:underline;">categoriepagina</a></li>
 <li style="margin-bottom:8px;font-size:14px;line-height:1.6;">Exposure in onze app, nieuwsbrief en op events die we bezoeken</li>
 <li style="margin-bottom:8px;font-size:14px;line-height:1.6;">Maandelijks analyserapport: bezoekers, clickgedrag, doorklikken naar je site</li>
 <li style="margin-bottom:8px;font-size:14px;line-height:1.6;">Een team dat actief landingspages en social campagnes bouwt om verkeer aan te jagen</li>
