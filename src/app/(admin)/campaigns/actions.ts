@@ -157,7 +157,7 @@ export async function markCampaignReady(id: string) {
 
   const { data: campaign } = await supabase
     .from('campaigns')
-    .select('subject, template_id, audience_type, audience_group_id, audience_segment_id, campaign_type')
+    .select('subject, template_id, audience_type, audience_group_id, audience_segment_id, campaign_type, templates(subject)')
     .eq('id', id)
     .maybeSingle()
 
@@ -166,9 +166,13 @@ export async function markCampaignReady(id: string) {
     throw new Error('Alleen eenmalige campagnes kunnen worden klaargezet voor verzending.')
   }
 
+  // Onderwerp mag uit de template komen — alleen falen als er nergens een onderwerp is.
+  const templateSubject = (campaign.templates as { subject?: string } | null)?.subject ?? null
+  const effectiveSubject = campaign.subject || templateSubject
+
   const missing: string[] = []
-  if (!campaign.subject) missing.push('onderwerpregel')
   if (!campaign.template_id) missing.push('template')
+  if (!effectiveSubject)     missing.push('onderwerpregel')
   if (!campaign.audience_type || (!campaign.audience_group_id && !campaign.audience_segment_id)) {
     missing.push('doelgroep')
   }
@@ -257,7 +261,6 @@ export async function sendCampaign(id: string) {
   }
 
   if (!campaign.template_id) throw new Error('Selecteer een template voordat je verstuurt.')
-  if (!campaign.subject)     throw new Error('Vul een onderwerpregel in voordat je verstuurt.')
 
   // 2. Zorg voor één campaign_step (auto-aangemaakt voor one_off)
   const { data: existingStep } = await supabase

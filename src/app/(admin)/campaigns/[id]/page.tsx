@@ -201,8 +201,10 @@ export default async function CampaignDetailPage({
   }
 
   // ── Validatiecheck: campagne klaar voor verzending? ──────────────────────────
+  // Onderwerp mag uit de template komen — zolang er ergens een subject is, is OK.
+  const effectiveSubject = campaign.subject || templateSubject
   const isReadyToSend = isOneOff && !!(
-    campaign.subject &&
+    effectiveSubject &&
     campaign.template_id &&
     campaign.audience_type &&
     (campaign.audience_group_id || campaign.audience_segment_id)
@@ -500,7 +502,7 @@ export default async function CampaignDetailPage({
               <div className="rounded-xl border border-amber-200 bg-amber-50 p-5">
                 <p className="text-xs font-semibold uppercase tracking-wide text-amber-800 mb-2">Vereist voor verzending</p>
                 <ul className="space-y-1 text-xs text-amber-700">
-                  {!campaign.subject      && <li>· Onderwerpregel ontbreekt</li>}
+                  {!effectiveSubject      && <li>· Onderwerpregel ontbreekt (zet er een in de template of in de campagne)</li>}
                   {!campaign.template_id  && <li>· Template niet geselecteerd</li>}
                   {(!campaign.audience_type || (!campaign.audience_group_id && !campaign.audience_segment_id)) && (
                     <li>· Doelgroep niet geselecteerd</li>
@@ -514,11 +516,16 @@ export default async function CampaignDetailPage({
               <h2 className="text-sm font-semibold text-zinc-700">E-mailinstellingen</h2>
               {campaign.subject ? (
                 <div>
-                  <p className="text-xs text-zinc-400">Onderwerpregel</p>
+                  <p className="text-xs text-zinc-400">Onderwerpregel (override)</p>
                   <p className="text-sm font-medium text-zinc-900">{campaign.subject}</p>
                 </div>
+              ) : templateSubject ? (
+                <div>
+                  <p className="text-xs text-zinc-400">Onderwerpregel (uit template)</p>
+                  <p className="text-sm font-medium text-zinc-900">{templateSubject}</p>
+                </div>
               ) : (
-                <p className="text-xs text-zinc-400 italic">Nog geen onderwerpregel</p>
+                <p className="text-xs text-amber-600 italic">Nog geen onderwerpregel — vul er een in op de template of campagne</p>
               )}
               {campaign.preview_text && (
                 <div>
