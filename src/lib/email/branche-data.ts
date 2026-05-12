@@ -89,25 +89,20 @@ export type BrancheTextRow = {
   ps_block: string
 }
 
-type SupaLike = {
-  from: (table: string) => {
-    select: (cols: string) => Promise<{ data: BrancheTextRow[] | null; error: unknown }>
-  }
-}
-
 /**
  * Laadt branche-overrides uit de DB (tabel `branche_texts`).
  * Faalt stilletjes wanneer de tabel nog niet bestaat — fallback op hardcoded defaults.
  */
-export async function loadBrancheTexts(
-  supabase: SupaLike,
-): Promise<Partial<Record<Branche, BrancheTextRow>>> {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export async function loadBrancheTexts(supabase: any): Promise<Partial<Record<Branche, BrancheTextRow>>> {
   try {
-    const { data } = await supabase.from('branche_texts').select('branche, zin, subject, url_slug, ps_block')
+    const { data } = await supabase
+      .from('branche_texts')
+      .select('branche, zin, subject, url_slug, ps_block')
     if (!data) return {}
     const out: Partial<Record<Branche, BrancheTextRow>> = {}
-    for (const row of data) {
-      if (BRANCHES.includes(row.branche)) out[row.branche] = row
+    for (const row of data as BrancheTextRow[]) {
+      if ((BRANCHES as readonly string[]).includes(row.branche)) out[row.branche] = row
     }
     return out
   } catch {
