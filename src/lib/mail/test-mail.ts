@@ -20,6 +20,8 @@ export type TestMailOptions = {
   /** Override onderwerpregel — gebruikt template-onderwerp als weggelaten. */
   subject?:    string | null
   appUrl:      string
+  /** Extra merge-velden (bv. uit een test-scenario) die als contact.custom_fields worden gerenderd. */
+  customFields?: Record<string, unknown> | null
 }
 
 export async function sendTestEmail(opts: TestMailOptions): Promise<SendResult> {
@@ -44,13 +46,16 @@ export async function sendTestEmail(opts: TestMailOptions): Promise<SendResult> 
     email:      opts.toEmail,
   }
 
+  const companyName = (opts.customFields?.bedrijfsnaam as string | undefined) ?? SAMPLE_VARS.company_name
+
   const { html, text } = renderEmail({
     htmlBody:       template.html_body,
     textBody:       template.text_body,
     contact:        sampleContact,
     campaignName:   SAMPLE_VARS.campaign_name,
-    companyName:    SAMPLE_VARS.company_name,
+    companyName,
     unsubscribeUrl: previewUnsubUrl,
+    customFields:   opts.customFields ?? null,
   })
 
   // Subject: kies prioriteit en substitueer variabelen
@@ -60,9 +65,10 @@ export async function sendTestEmail(opts: TestMailOptions): Promise<SendResult> 
     textBody:       null,
     contact:        sampleContact,
     campaignName:   SAMPLE_VARS.campaign_name,
-    companyName:    SAMPLE_VARS.company_name,
+    companyName,
     unsubscribeUrl: previewUnsubUrl,
     appendFooter:   false,
+    customFields:   opts.customFields ?? null,
   })
 
   const cleanSubject = htmlToText(renderedSubject).replace(/\s+/g, ' ').trim()

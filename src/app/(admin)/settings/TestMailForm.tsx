@@ -3,6 +3,7 @@
 import { useActionState } from 'react'
 import { sendTestMail } from './actions'
 import type { TestMailResult } from './actions'
+import { TEST_SCENARIOS } from '@/lib/email/test-scenarios'
 
 type Template = { id: string; name: string }
 
@@ -54,6 +55,22 @@ export function TestMailForm({ templates }: { templates: Template[] }) {
           placeholder="[TESTMAIL] …"
           className="block w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm focus:border-zinc-500 focus:outline-none"
         />
+      </div>
+
+      <div>
+        <label className="block text-xs font-medium text-zinc-600 mb-1">
+          Scenario <span className="text-zinc-400 font-normal">(vult merge-velden zoals {'{{branche_zin}}'}, {'{{bedrijfsnaam}}'}, {'{{ps_offgrid}}'})</span>
+        </label>
+        <select
+          name="scenario"
+          defaultValue=""
+          className="block w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm focus:border-zinc-500 focus:outline-none"
+        >
+          <option value="">Geen — alleen standaardvariabelen</option>
+          {TEST_SCENARIOS.map((s) => (
+            <option key={s.key} value={s.key}>{s.label}</option>
+          ))}
+        </select>
       </div>
 
       <div className="flex items-center gap-3">

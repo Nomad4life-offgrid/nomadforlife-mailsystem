@@ -4,6 +4,7 @@ import { requireAdmin }    from '@/lib/auth/guards'
 import { createClient }    from '@/lib/supabase/server'
 import { sendTestEmail }   from '@/lib/mail/test-mail'
 import { sendgrid, app }   from '@/lib/config'
+import { getScenario }     from '@/lib/email/test-scenarios'
 
 export type TestMailResult =
   | { ok: true }
@@ -18,11 +19,13 @@ export async function sendTestMail(
   const toEmail    = (formData.get('to_email')    as string)?.trim()
   const templateId = (formData.get('template_id') as string)?.trim()
   const subject    = (formData.get('subject')     as string)?.trim() || null
+  const scenarioId = (formData.get('scenario')    as string)?.trim() || null
 
   if (!toEmail)    return { ok: false, error: 'Vul een ontvanger in.' }
   if (!templateId) return { ok: false, error: 'Kies een template.' }
 
   const supabase = await createClient()
+  const scenario = getScenario(scenarioId)
 
   const result = await sendTestEmail({
     supabase,
@@ -32,6 +35,7 @@ export async function sendTestMail(
     fromName:  sendgrid.fromName,
     subject,
     appUrl:    app.url,
+    customFields: scenario?.customFields ?? null,
   })
 
   if (!result.ok) return { ok: false, error: result.error }
