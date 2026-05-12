@@ -21,8 +21,8 @@ const html = `<!DOCTYPE html>
 <style>
 @media screen and (max-width:620px){
   .mobile-padding{padding-left:20px !important;padding-right:20px !important;}
-  .mobile-h1{padding-top:24px !important;font-size:44px !important;line-height:1.05 !important;}
-  .mobile-h2{font-size:24px !important;line-height:26px !important;}
+  .mobile-h1{padding-top:24px !important;font-size:30px !important;line-height:1.2 !important;}
+  .mobile-h2{font-size:26px !important;line-height:28px !important;}
 }
 </style>
 </head>
@@ -37,8 +37,8 @@ const html = `<!DOCTYPE html>
 <tr>
 <td class="mobile-padding" style="font-family:'Rubik',Arial,sans-serif;color:#090e08;font-size:14px;line-height:1.6;font-weight:400;">
 
-<h1 class="mobile-h1" style="margin:0 0 12px 0;padding-top:60px;font-family:'Rubik',Arial,sans-serif;font-size:52px;line-height:1.05;font-weight:700;${headingStyle}">
-<span style="${headingStyle}">Word Founding Partner van Nomad4Life</span>
+<h1 class="mobile-h1" style="margin:0 0 16px 0;padding-top:60px;font-family:'Rubik',Arial,sans-serif;font-size:36px;line-height:1.15;font-weight:700;color:${ORANGE};-webkit-text-fill-color:${ORANGE};">
+Word Founding Partner van Nomad4Life
 </h1>
 
 <p style="margin:0 0 20px 0;font-size:14px;line-height:1.6;font-weight:400;">
@@ -53,16 +53,16 @@ Ik ben Pim Faassen, oprichter van Nomad4Life, een nieuw Nederlandstalig platform
 Ik schrijf jullie omdat <strong>{{bedrijfsnaam}}</strong> in mijn ogen precies past bij wat onze leden zoeken op het gebied van {{branche_zin}}
 </p>
 
-<h2 class="mobile-h2" style="margin:0 0 12px 0;font-family:'Rubik',Arial,sans-serif;font-size:26px;line-height:28px;font-weight:700;color:#090e08;-webkit-text-fill-color:#090e08;">
-<span style="color:#090e08;-webkit-text-fill-color:#090e08;">Eerlijk verhaal: we zijn net gestart.</span>
+<h2 class="mobile-h2" style="margin:0 0 12px 0;font-family:'Rubik',Arial,sans-serif;font-size:28px;line-height:30px;font-weight:700;color:#090e08;-webkit-text-fill-color:#090e08;">
+Eerlijk verhaal: we zijn net gestart.
 </h2>
 
 <p style="margin:0 0 20px 0;font-size:14px;line-height:1.6;font-weight:400;">
 Een nieuw platform heeft altijd de kip-en-ei-uitdaging: eerst leden, dan partners, of andersom? Wij draaien die vraag om. We zoeken een beperkt aantal Founding Partners die met ons meegroeien vanaf dag één. En om dat aantrekkelijk te maken:
 </p>
 
-<h2 class="mobile-h2" style="margin:0 0 12px 0;font-family:'Rubik',Arial,sans-serif;font-size:26px;line-height:28px;font-weight:700;color:#090e08;-webkit-text-fill-color:#090e08;">
-<span style="color:#090e08;-webkit-text-fill-color:#090e08;">Het hele eerste jaar is volledig kosteloos. Geen kleine lettertjes.</span>
+<h2 class="mobile-h2" style="margin:0 0 12px 0;font-family:'Rubik',Arial,sans-serif;font-size:28px;line-height:30px;font-weight:700;color:#090e08;-webkit-text-fill-color:#090e08;">
+Het hele eerste jaar is volledig kosteloos. Geen kleine lettertjes.
 </h2>
 
 <p style="margin:0 0 12px 0;font-size:14px;line-height:1.6;font-weight:400;">
@@ -77,16 +77,16 @@ Wat dat het eerste jaar concreet oplevert:
 <li style="margin-bottom:0;font-size:14px;line-height:1.6;">Optioneel: jullie product verkopen via onze webshop (accessoires &amp; merchandise)</li>
 </ul>
 
-<h2 class="mobile-h2" style="margin:0 0 12px 0;font-family:'Rubik',Arial,sans-serif;font-size:26px;line-height:28px;font-weight:700;color:#090e08;-webkit-text-fill-color:#090e08;">
-<span style="color:#090e08;-webkit-text-fill-color:#090e08;">Na dat eerste jaar kies jíj.</span>
+<h2 class="mobile-h2" style="margin:0 0 12px 0;font-family:'Rubik',Arial,sans-serif;font-size:28px;line-height:30px;font-weight:700;color:#090e08;-webkit-text-fill-color:#090e08;">
+Na dat eerste jaar kies jíj.
 </h2>
 
 <p style="margin:0 0 28px 0;font-size:14px;line-height:1.6;font-weight:400;">
 We laten de cijfers zien (bezoekers, leads, conversie) en dan beslissen jullie rustig of je doorgaat. Geen automatische verlenging, geen verrassingen. Het risico om nu in te stappen is nul.
 </p>
 
-<h2 class="mobile-h2" style="margin:0 0 12px 0;font-family:'Rubik',Arial,sans-serif;font-size:26px;line-height:28px;font-weight:700;color:#090e08;-webkit-text-fill-color:#090e08;">
-<span style="color:#090e08;-webkit-text-fill-color:#090e08;">Wat wij beloven te doen</span>
+<h2 class="mobile-h2" style="margin:0 0 12px 0;font-family:'Rubik',Arial,sans-serif;font-size:28px;line-height:30px;font-weight:700;color:#090e08;-webkit-text-fill-color:#090e08;">
+Wat wij beloven te doen
 </h2>
 
 <p style="margin:0 0 20px 0;font-size:14px;line-height:1.6;font-weight:400;">
