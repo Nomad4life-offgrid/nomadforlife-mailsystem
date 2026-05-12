@@ -21,8 +21,8 @@ const html = `<!DOCTYPE html>
 <style>
 @media screen and (max-width:620px){
   .mobile-padding{padding-left:20px !important;padding-right:20px !important;}
-  .mobile-h1{padding-top:24px !important;font-size:24px !important;line-height:1.2 !important;}
-  .mobile-h2{font-size:16px !important;line-height:1.3 !important;}
+  .mobile-h1{padding-top:24px !important;font-size:30px !important;line-height:1.15 !important;}
+  .mobile-h2{font-size:18px !important;line-height:1.3 !important;}
 }
 </style>
 </head>
@@ -37,7 +37,7 @@ const html = `<!DOCTYPE html>
 <tr>
 <td class="mobile-padding" style="font-family:'Rubik',Arial,sans-serif;color:#090e08;font-size:14px;line-height:1.6;font-weight:400;">
 
-<h1 class="mobile-h1" style="margin:0 0 24px 0;padding-top:60px;font-family:'Rubik',Arial,sans-serif;font-size:28px;line-height:1.2;font-weight:700;${headingStyle}">
+<h1 class="mobile-h1" style="margin:0 0 12px 0;padding-top:60px;font-family:'Rubik',Arial,sans-serif;font-size:36px;line-height:1.15;font-weight:700;${headingStyle}">
 <span style="${headingStyle}">Word Founding Partner van Nomad4Life</span>
 </h1>
 
@@ -53,16 +53,16 @@ Ik ben Pim Faassen, oprichter van Nomad4Life, een nieuw Nederlandstalig platform
 Ik schrijf jullie omdat <strong>{{bedrijfsnaam}}</strong> in mijn ogen precies past bij wat onze leden zoeken op het gebied van {{branche_zin}}
 </p>
 
-<h2 class="mobile-h2" style="margin:0 0 12px 0;font-family:'Rubik',Arial,sans-serif;font-size:18px;line-height:1.3;font-weight:700;${headingStyle}">
-<span style="${headingStyle}">Eerlijk verhaal: we zijn net gestart.</span>
+<h2 class="mobile-h2" style="margin:0 0 12px 0;font-family:'Rubik',Arial,sans-serif;font-size:20px;line-height:1.3;font-weight:700;color:#090e08;-webkit-text-fill-color:#090e08;">
+<span style="color:#090e08;-webkit-text-fill-color:#090e08;">Eerlijk verhaal: we zijn net gestart.</span>
 </h2>
 
 <p style="margin:0 0 20px 0;font-size:14px;line-height:1.6;font-weight:400;">
 Een nieuw platform heeft altijd de kip-en-ei-uitdaging: eerst leden, dan partners, of andersom? Wij draaien die vraag om. We zoeken een beperkt aantal Founding Partners die met ons meegroeien vanaf dag één. En om dat aantrekkelijk te maken:
 </p>
 
-<h2 class="mobile-h2" style="margin:0 0 12px 0;font-family:'Rubik',Arial,sans-serif;font-size:18px;line-height:1.3;font-weight:700;${headingStyle}">
-<span style="${headingStyle}">Het hele eerste jaar is volledig kosteloos. Geen kleine lettertjes.</span>
+<h2 class="mobile-h2" style="margin:0 0 12px 0;font-family:'Rubik',Arial,sans-serif;font-size:20px;line-height:1.3;font-weight:700;color:#090e08;-webkit-text-fill-color:#090e08;">
+<span style="color:#090e08;-webkit-text-fill-color:#090e08;">Het hele eerste jaar is volledig kosteloos. Geen kleine lettertjes.</span>
 </h2>
 
 <p style="margin:0 0 12px 0;font-size:14px;line-height:1.6;font-weight:400;">
@@ -70,23 +70,23 @@ Wat dat het eerste jaar concreet oplevert:
 </p>
 
 <ul style="margin:0 0 24px 20px;padding:0;font-size:14px;line-height:1.6;font-weight:400;">
-<li style="margin-bottom:8px;">Permanente vermelding op de relevante <a href="{{categorie_url}}" style="color:${ORANGE};text-decoration:underline;">categoriepagina</a></li>
-<li style="margin-bottom:8px;">Exposure in onze app, nieuwsbrief en op events die we bezoeken</li>
-<li style="margin-bottom:8px;">Maandelijks analyserapport: bezoekers, clickgedrag, doorklikken naar je site</li>
-<li style="margin-bottom:8px;">Een team dat actief landingspages en social campagnes bouwt om verkeer aan te jagen</li>
-<li style="margin-bottom:0;">Optioneel: jullie product verkopen via onze webshop (accessoires &amp; merchandise)</li>
+<li style="margin-bottom:8px;font-size:14px;line-height:1.6;">Permanente vermelding op de relevante <a href="{{categorie_url}}" style="color:${ORANGE};text-decoration:underline;">categoriepagina</a></li>
+<li style="margin-bottom:8px;font-size:14px;line-height:1.6;">Exposure in onze app, nieuwsbrief en op events die we bezoeken</li>
+<li style="margin-bottom:8px;font-size:14px;line-height:1.6;">Maandelijks analyserapport: bezoekers, clickgedrag, doorklikken naar je site</li>
+<li style="margin-bottom:8px;font-size:14px;line-height:1.6;">Een team dat actief landingspages en social campagnes bouwt om verkeer aan te jagen</li>
+<li style="margin-bottom:0;font-size:14px;line-height:1.6;">Optioneel: jullie product verkopen via onze webshop (accessoires &amp; merchandise)</li>
 </ul>
 
-<h2 class="mobile-h2" style="margin:0 0 12px 0;font-family:'Rubik',Arial,sans-serif;font-size:18px;line-height:1.3;font-weight:700;${headingStyle}">
-<span style="${headingStyle}">Na dat eerste jaar kies jíj.</span>
+<h2 class="mobile-h2" style="margin:0 0 12px 0;font-family:'Rubik',Arial,sans-serif;font-size:20px;line-height:1.3;font-weight:700;color:#090e08;-webkit-text-fill-color:#090e08;">
+<span style="color:#090e08;-webkit-text-fill-color:#090e08;">Na dat eerste jaar kies jíj.</span>
 </h2>
 
 <p style="margin:0 0 28px 0;font-size:14px;line-height:1.6;font-weight:400;">
 We laten de cijfers zien (bezoekers, leads, conversie) en dan beslissen jullie rustig of je doorgaat. Geen automatische verlenging, geen verrassingen. Het risico om nu in te stappen is nul.
 </p>
 
-<h2 class="mobile-h2" style="margin:0 0 12px 0;font-family:'Rubik',Arial,sans-serif;font-size:18px;line-height:1.3;font-weight:700;${headingStyle}">
-<span style="${headingStyle}">Wat wij beloven te doen</span>
+<h2 class="mobile-h2" style="margin:0 0 12px 0;font-family:'Rubik',Arial,sans-serif;font-size:20px;line-height:1.3;font-weight:700;color:#090e08;-webkit-text-fill-color:#090e08;">
+<span style="color:#090e08;-webkit-text-fill-color:#090e08;">Wat wij beloven te doen</span>
 </h2>
 
 <p style="margin:0 0 20px 0;font-size:14px;line-height:1.6;font-weight:400;">
