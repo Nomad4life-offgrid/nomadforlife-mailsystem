@@ -161,6 +161,26 @@ export async function archiveContact(id: string) {
   redirect('/contacts')
 }
 
+export async function archiveContactsBulk(ids: string[]): Promise<{ archived: number }> {
+  await requireAdmin()
+  if (!ids || ids.length === 0) return { archived: 0 }
+
+  const supabase = createServiceClient()
+  const now      = new Date().toISOString()
+
+  const { data, error } = await supabase
+    .from('contacts')
+    .update({ deleted_at: now })
+    .in('id', ids)
+    .is('deleted_at', null)
+    .select('id')
+
+  if (error) throw new Error(error.message)
+
+  revalidatePath('/contacts')
+  return { archived: data?.length ?? 0 }
+}
+
 // ── RESTORE ───────────────────────────────────────────────────────────────────
 
 export async function restoreContact(id: string) {

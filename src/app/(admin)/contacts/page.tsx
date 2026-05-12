@@ -1,12 +1,9 @@
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { StatCard } from '@/components/ui/StatCard'
-import { ContactStatusBadge } from '@/components/ui/Badge'
 import { EmptyState } from '@/components/ui/EmptyState'
-import { formatDate } from '@/utils/date'
-import { fullName, initials } from '@/utils/format'
-import { archiveContact } from './actions'
 import { SourceFilter } from './SourceFilter'
+import { ContactsTable } from './ContactsTable'
 
 export const metadata = { title: 'Contacten' }
 
@@ -216,123 +213,27 @@ export default async function ContactsPage({
       </div>
 
       {/* Table */}
-      <div className="mt-4 overflow-hidden rounded-xl border border-zinc-200 bg-white">
-        <table className="w-full text-sm">
-          <thead className="border-b border-zinc-200 bg-zinc-50">
-            <tr>
-              <th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-zinc-400">Naam</th>
-              <th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-zinc-400">E-mail</th>
-              <th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-zinc-400 hidden md:table-cell">Bedrijf</th>
-              <th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-zinc-400 hidden lg:table-cell">Type</th>
-              <th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-zinc-400">Status</th>
-              <th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-zinc-400 hidden lg:table-cell">Bron</th>
-              <th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-zinc-400 hidden xl:table-cell">Opt-in</th>
-              <th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-zinc-400 hidden xl:table-cell">Aangemeld</th>
-              <th className="px-5 py-3" />
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-zinc-100">
-            {(!contacts || contacts.length === 0) && (
-              <tr>
-                <td colSpan={9} className="py-0">
-                  <EmptyState
-                    title={q ? `Geen resultaten voor "${q}"` : 'Geen contacten'}
-                    description={q ? 'Probeer een andere zoekterm.' : 'Voeg je eerste contact toe via de knop rechtsboven.'}
-                    action={q ? (
-                      <Link href="/contacts" className="text-sm text-zinc-500 underline">Zoekopdracht wissen</Link>
-                    ) : (
-                      <Link href="/contacts/new" className="inline-flex items-center gap-2 rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-700">
-                        Nieuw contact
-                      </Link>
-                    )}
-                  />
-                </td>
-              </tr>
+      {(!contacts || contacts.length === 0) ? (
+        <div className="mt-4 overflow-hidden rounded-xl border border-zinc-200 bg-white">
+          <EmptyState
+            title={q ? `Geen resultaten voor "${q}"` : 'Geen contacten'}
+            description={q ? 'Probeer een andere zoekterm.' : 'Voeg je eerste contact toe via de knop rechtsboven.'}
+            action={q ? (
+              <Link href="/contacts" className="text-sm text-zinc-500 underline">Zoekopdracht wissen</Link>
+            ) : (
+              <Link href="/contacts/new" className="inline-flex items-center gap-2 rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-700">
+                Nieuw contact
+              </Link>
             )}
-            {contacts?.map((c) => {
-              const name = fullName(c.first_name, c.last_name)
-              const ini  = initials(c.first_name, c.last_name) || c.email[0].toUpperCase()
-              const archiveFn = archiveContact.bind(null, c.id)
-              const isBounced = !!c.bounced_at
-
-              return (
-                <tr key={c.id} className="group hover:bg-zinc-50 transition-colors">
-                  {/* Naam */}
-                  <td className="px-5 py-3.5">
-                    <div className="flex items-center gap-3">
-                      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-zinc-100 text-xs font-semibold text-zinc-600">
-                        {ini}
-                      </span>
-                      <Link
-                        href={`/contacts/${c.id}`}
-                        className="font-medium text-zinc-900 hover:text-zinc-600 transition-colors"
-                      >
-                        {name !== '—' ? name : <span className="italic text-zinc-400">Geen naam</span>}
-                      </Link>
-                    </div>
-                  </td>
-
-                  {/* E-mail */}
-                  <td className="px-5 py-3.5 font-mono text-xs text-zinc-500">{c.email}</td>
-
-                  {/* Bedrijf */}
-                  <td className="px-5 py-3.5 text-zinc-500 hidden md:table-cell">
-                    {c.company ?? <span className="text-zinc-300">—</span>}
-                  </td>
-
-                  {/* Type */}
-                  <td className="px-5 py-3.5 hidden lg:table-cell">
-                    {c.contact_type
-                      ? <span className="text-xs text-zinc-600">{TYPE_LABELS[c.contact_type] ?? c.contact_type}</span>
-                      : <span className="text-zinc-300">—</span>}
-                  </td>
-
-                  {/* Status */}
-                  <td className="px-5 py-3.5">
-                    {isBounced
-                      ? <span className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium bg-orange-50 text-orange-700">
-                          <span className="h-1.5 w-1.5 rounded-full bg-orange-400" />Bounced
-                        </span>
-                      : <ContactStatusBadge status={c.status} />}
-                  </td>
-
-                  {/* Bron */}
-                  <td className="px-5 py-3.5 text-xs text-zinc-400 hidden lg:table-cell">
-                    {SOURCE_LABELS[c.source] ?? c.source}
-                  </td>
-
-                  {/* Opt-in */}
-                  <td className="px-5 py-3.5 text-xs text-zinc-400 tabular-nums hidden xl:table-cell">
-                    {c.opted_in_at ? formatDate(c.opted_in_at) : <span className="italic">—</span>}
-                  </td>
-
-                  {/* Aangemeld */}
-                  <td className="px-5 py-3.5 text-xs text-zinc-400 tabular-nums hidden xl:table-cell">
-                    {formatDate(c.created_at)}
-                  </td>
-
-                  {/* Acties */}
-                  <td className="px-5 py-3.5">
-                    <div className="flex items-center justify-end gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <Link href={`/contacts/${c.id}`} className="text-xs font-medium text-zinc-500 hover:text-zinc-900 whitespace-nowrap">
-                        Bekijken
-                      </Link>
-                      <Link href={`/contacts/${c.id}/edit`} className="text-xs font-medium text-zinc-500 hover:text-zinc-900">
-                        Bewerken
-                      </Link>
-                      <form action={archiveFn} className="inline">
-                        <button type="submit" className="text-xs font-medium text-red-400 hover:text-red-600">
-                          Archiveren
-                        </button>
-                      </form>
-                    </div>
-                  </td>
-                </tr>
-              )
-            })}
-          </tbody>
-        </table>
-      </div>
+          />
+        </div>
+      ) : (
+        <ContactsTable
+          contacts={contacts}
+          sourceLabels={SOURCE_LABELS}
+          typeLabels={TYPE_LABELS}
+        />
+      )}
 
       {/* Pagination */}
       {totalPages > 1 && (
