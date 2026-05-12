@@ -148,20 +148,20 @@ export function TemplateEditorForm({ action, submitLabel, cancelHref, extraButto
           <div className="mb-2"><LogoSnippet /></div>
           <div className="mb-2 rounded-md border border-zinc-200 bg-zinc-50 px-3 py-2 text-xs">
             <p className="mb-1.5 font-medium text-zinc-700">
-              Verplicht: <code className="font-mono bg-white border border-zinc-200 px-1 rounded">{'{{unsubscribe_url}}'}</code>
+              Verplicht: <code className="font-mono text-zinc-900 bg-white border border-zinc-300 px-1.5 py-0.5 rounded">{'{{unsubscribe_url}}'}</code>
             </p>
             <details>
-              <summary className="cursor-pointer text-zinc-600 hover:text-zinc-900 select-none">
+              <summary className="cursor-pointer text-zinc-700 hover:text-zinc-900 select-none font-medium">
                 Beschikbare variabelen ({optionalVars.length})
               </summary>
               <table className="mt-2 w-full text-xs">
                 <tbody>
                   {optionalVars.map(v => (
                     <tr key={v.variable} className="align-top">
-                      <td className="py-0.5 pr-3 whitespace-nowrap">
-                        <code className="font-mono bg-white border border-zinc-200 px-1 rounded">{v.variable}</code>
+                      <td className="py-1 pr-3 whitespace-nowrap">
+                        <code className="font-mono text-zinc-900 bg-white border border-zinc-300 px-1.5 py-0.5 rounded">{v.variable}</code>
                       </td>
-                      <td className="py-0.5 text-zinc-500">{v.description}</td>
+                      <td className="py-1 text-zinc-700">{v.description}</td>
                     </tr>
                   ))}
                 </tbody>
