@@ -101,35 +101,51 @@ export async function deleteTemplate(id: string) {
   await requireAdmin()
   const supabase = createServiceClient()
 
-  // campaign_steps.template_id is NOT NULL + ON DELETE RESTRICT, dus we kunnen
-  // een template niet verwijderen zolang een funnel-stap ernaar verwijst.
-  // Toon een nette foutmelding ipv een 500.
+  // campaign_steps.template_id is NOT NULL + ON DELETE RESTRICT. We cascaden
+  // dus expliciet: alle funnel-stappen die deze template gebruiken worden
+  // verwijderd (mail_logs naar die stappen cascaden mee via ON DELETE CASCADE).
   const { data: usedSteps, error: stepErr } = await supabase
     .from('campaign_steps')
-    .select('campaign_id, campaigns(name)')
+    .select('id, campaigns(name)')
     .eq('template_id', id)
-    .limit(3)
 
   if (stepErr) {
     redirect(`/templates?error=${encodeURIComponent('Kon template-gebruik niet controleren: ' + stepErr.message)}`)
   }
 
+  let removedSteps = 0
+  let campaignNames: string[] = []
+
   if (usedSteps && usedSteps.length > 0) {
-    const names = Array.from(
+    removedSteps = usedSteps.length
+    campaignNames = Array.from(
       new Set(
         usedSteps
           .map((s) => (s.campaigns as unknown as { name?: string } | null)?.name)
           .filter(Boolean) as string[],
       ),
     )
-    const detail = names.length > 0 ? ` (${names.join(', ')}${usedSteps.length >= 3 ? ', …' : ''})` : ''
-    redirect(`/templates?error=${encodeURIComponent(`Deze template wordt nog gebruikt in een campagne${detail}. Verwijder of wijzig die stap eerst.`)}`)
+
+    const stepIds = usedSteps.map((s) => s.id)
+    const { error: delStepsErr } = await supabase
+      .from('campaign_steps')
+      .delete()
+      .in('id', stepIds)
+    if (delStepsErr) {
+      redirect(`/templates?error=${encodeURIComponent('Funnel-stappen verwijderen mislukt: ' + delStepsErr.message)}`)
+    }
   }
 
   const { error } = await supabase.from('templates').delete().eq('id', id)
   if (error) {
     redirect(`/templates?error=${encodeURIComponent('Verwijderen mislukt: ' + error.message)}`)
   }
+
   revalidatePath('/templates')
+
+  if (removedSteps > 0) {
+    const detail = campaignNames.length > 0 ? ` uit campagne${campaignNames.length === 1 ? '' : 's'} ${campaignNames.join(', ')}` : ''
+    redirect(`/templates?info=${encodeURIComponent(`Template verwijderd. ${removedSteps} funnel-stap${removedSteps === 1 ? '' : 'pen'}${detail} en bijbehorende verzendlogs zijn meegewist.`)}`)
+  }
   redirect('/templates')
 }

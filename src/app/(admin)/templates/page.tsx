@@ -8,9 +8,9 @@ export const metadata = { title: 'Templates' }
 export default async function TemplatesPage({
   searchParams,
 }: {
-  searchParams: Promise<{ error?: string }>
+  searchParams: Promise<{ error?: string; info?: string }>
 }) {
-  const { error } = await searchParams
+  const { error, info } = await searchParams
   const supabase = await createClient()
   const { data: templates } = await supabase
     .from('templates')
@@ -22,6 +22,11 @@ export default async function TemplatesPage({
       {error && (
         <div className="mb-4 rounded-md border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
           {error}
+        </div>
+      )}
+      {info && (
+        <div className="mb-4 rounded-md border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+          {info}
         </div>
       )}
       {/* Header */}
