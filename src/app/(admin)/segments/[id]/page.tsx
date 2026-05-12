@@ -197,13 +197,19 @@ export default async function GroupDetailPage({
           </div>
 
           {/* Campagne versturen */}
-          <div className="rounded-lg border border-zinc-200 bg-zinc-50 p-4">
-            <p className="text-xs font-medium text-zinc-600 mb-2">Campagne versturen</p>
+          <div className="rounded-lg border border-zinc-200 bg-zinc-50 p-4 space-y-2">
+            <p className="text-xs font-medium text-zinc-600">Campagne versturen</p>
+            <Link
+              href={`/campaigns/new?group_id=${id}`}
+              className="block w-full rounded-md bg-zinc-900 py-2 text-center text-sm font-medium text-white hover:bg-zinc-700 transition-colors"
+            >
+              Nieuwe campagne naar deze lijst →
+            </Link>
             <Link
               href={`/send?group_id=${id}`}
-              className="block w-full rounded-md border border-zinc-300 bg-white py-2 text-center text-sm font-medium text-zinc-700 hover:bg-zinc-50 transition-colors"
+              className="block w-full rounded-md border border-zinc-300 bg-white py-2 text-center text-xs font-medium text-zinc-700 hover:bg-zinc-50 transition-colors"
             >
-              Verstuur aan deze lijst →
+              Inschrijven op bestaande funnel
             </Link>
           </div>
 

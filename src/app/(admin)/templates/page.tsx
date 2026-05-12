@@ -99,20 +99,28 @@ export default async function TemplatesPage({
                   </p>
 
                   {/* Actions */}
-                  <div className="mt-4 flex items-center gap-2 pt-3 border-t border-zinc-100">
+                  <div className="mt-4 space-y-2 pt-3 border-t border-zinc-100">
                     <Link
-                      href={`/templates/${t.id}/edit`}
-                      className="flex-1 rounded-md border border-zinc-200 px-3 py-1.5 text-center text-xs font-medium text-zinc-700 hover:border-zinc-300 hover:bg-zinc-50 transition-colors"
+                      href={`/campaigns/new?template_id=${t.id}`}
+                      className="block w-full rounded-md bg-zinc-900 px-3 py-1.5 text-center text-xs font-medium text-white hover:bg-zinc-700 transition-colors"
                     >
-                      Bewerken
+                      Verzend deze template →
                     </Link>
-                    <Link
-                      href={`/templates/${t.id}/preview`}
-                      className="flex-1 rounded-md border border-zinc-200 px-3 py-1.5 text-center text-xs font-medium text-zinc-700 hover:border-zinc-300 hover:bg-zinc-50 transition-colors"
-                    >
-                      Voorbeeld
-                    </Link>
-                    <DeleteTemplateButton action={deleteFn} name={t.name} />
+                    <div className="flex items-center gap-2">
+                      <Link
+                        href={`/templates/${t.id}/edit`}
+                        className="flex-1 rounded-md border border-zinc-200 px-3 py-1.5 text-center text-xs font-medium text-zinc-700 hover:border-zinc-300 hover:bg-zinc-50 transition-colors"
+                      >
+                        Bewerken
+                      </Link>
+                      <Link
+                        href={`/templates/${t.id}/preview`}
+                        className="flex-1 rounded-md border border-zinc-200 px-3 py-1.5 text-center text-xs font-medium text-zinc-700 hover:border-zinc-300 hover:bg-zinc-50 transition-colors"
+                      >
+                        Voorbeeld
+                      </Link>
+                      <DeleteTemplateButton action={deleteFn} name={t.name} />
+                    </div>
                   </div>
                 </div>
               </div>

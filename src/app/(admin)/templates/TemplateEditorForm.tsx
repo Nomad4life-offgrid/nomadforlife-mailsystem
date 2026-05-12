@@ -121,7 +121,7 @@ export function TemplateEditorForm({ action, submitLabel, cancelHref, extraButto
               className="block w-full rounded-md border border-zinc-300 px-3 py-2 text-sm focus:border-zinc-500 focus:outline-none"
             />
             <p className="mt-1 text-xs text-zinc-400">
-              Alleen platte tekst. HTML-code wordt automatisch verwijderd bij plakken.
+              Alleen platte tekst. Variabelen zijn toegestaan (bv. <code className="bg-zinc-100 px-1 rounded font-mono">{'{{onderwerp}}'}</code>).
             </p>
           </div>
           <div>
@@ -135,6 +135,9 @@ export function TemplateEditorForm({ action, submitLabel, cancelHref, extraButto
               placeholder="Korte tekst zichtbaar in de inbox…"
               className="block w-full rounded-md border border-zinc-300 px-3 py-2 text-sm focus:border-zinc-500 focus:outline-none"
             />
+            <p className="mt-1 text-xs text-zinc-400">
+              Variabelen zoals <code className="bg-zinc-100 px-1 rounded font-mono">{'{{preheader}}'}</code> of <code className="bg-zinc-100 px-1 rounded font-mono">{'{{branche}}'}</code> zijn toegestaan.
+            </p>
           </div>
         </div>
 
@@ -143,13 +146,28 @@ export function TemplateEditorForm({ action, submitLabel, cancelHref, extraButto
             HTML-inhoud <span className="text-red-500">*</span>
           </label>
           <div className="mb-2"><LogoSnippet /></div>
-          <p className="text-xs text-zinc-400 mb-1.5">
-            Verplicht: <code className="font-mono bg-zinc-100 px-1 rounded">{'{{unsubscribe_url}}'}</code>
-            {' '}— Optioneel:{' '}
-            {optionalVars.map(v => (
-              <code key={v.variable} className="font-mono bg-zinc-100 px-1 rounded mr-1">{v.variable}</code>
-            ))}
-          </p>
+          <div className="mb-2 rounded-md border border-zinc-200 bg-zinc-50 px-3 py-2 text-xs">
+            <p className="mb-1.5 font-medium text-zinc-700">
+              Verplicht: <code className="font-mono bg-white border border-zinc-200 px-1 rounded">{'{{unsubscribe_url}}'}</code>
+            </p>
+            <details>
+              <summary className="cursor-pointer text-zinc-600 hover:text-zinc-900 select-none">
+                Beschikbare variabelen ({optionalVars.length})
+              </summary>
+              <table className="mt-2 w-full text-xs">
+                <tbody>
+                  {optionalVars.map(v => (
+                    <tr key={v.variable} className="align-top">
+                      <td className="py-0.5 pr-3 whitespace-nowrap">
+                        <code className="font-mono bg-white border border-zinc-200 px-1 rounded">{v.variable}</code>
+                      </td>
+                      <td className="py-0.5 text-zinc-500">{v.description}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </details>
+          </div>
           <textarea
             id="html_body" name="html_body" rows={20} required
             value={htmlBody}

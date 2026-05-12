@@ -5,7 +5,12 @@ import { createCampaign } from '../actions'
 
 export const metadata = { title: 'Nieuwe campagne' }
 
-export default async function NewCampaignPage() {
+export default async function NewCampaignPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ template_id?: string; group_id?: string }>
+}) {
+  const { template_id: preTemplateId, group_id: preGroupId } = await searchParams
   const supabase = await createClient()
 
   const [
@@ -47,9 +52,12 @@ export default async function NewCampaignPage() {
         groups={(groups ?? []) as any}
         segments={(segments ?? []) as any}
         defaultValues={{
-          from_name:      process.env.DEFAULT_FROM_NAME  || 'Nomad For Life',
-          from_email:     process.env.DEFAULT_FROM_EMAIL || 'info@nomad4life.com',
-          reply_to_email: process.env.DEFAULT_FROM_EMAIL || 'info@nomad4life.com',
+          from_name:         process.env.DEFAULT_FROM_NAME  || 'Nomad For Life',
+          from_email:        process.env.DEFAULT_FROM_EMAIL || 'info@nomad4life.com',
+          reply_to_email:    process.env.DEFAULT_FROM_EMAIL || 'info@nomad4life.com',
+          template_id:       preTemplateId,
+          audience_type:     preGroupId ? 'group' : undefined,
+          audience_group_id: preGroupId,
         }}
       />
     </div>

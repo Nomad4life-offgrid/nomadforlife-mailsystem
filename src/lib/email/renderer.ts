@@ -37,6 +37,15 @@ export const TEMPLATE_VAR_REFERENCE: Array<{
   { variable: '{{company_name}}',    description: 'Bedrijfs- of merknaam',     example: 'Nomad For Life',              required: false },
   { variable: '{{campaign_name}}',   description: 'Naam van de campagne',      example: 'Welkomstcampagne',            required: false },
   { variable: '{{unsubscribe_url}}', description: 'Afmeldlink (URL)',          example: 'https://…/unsubscribe/TOKEN', required: true  },
+  // ── Founding Partners outreach (per-contact custom_fields) ─────────────
+  { variable: '{{bedrijfsnaam}}',    description: 'Bedrijfsnaam contact (custom_fields)',           example: '12Volt Expert',                 required: false },
+  { variable: '{{aanhef}}',          description: 'Aanhef, bv. "Hallo X,"',                          example: 'Hallo 12Volt Expert,',          required: false },
+  { variable: '{{onderwerp}}',       description: 'Onderwerpregel per branche',                      example: 'Founding Partner van Nomad…',   required: false },
+  { variable: '{{preheader}}',       description: 'Verborgen preview-tekst bovenaan',                example: 'Geen kleine lettertjes.',       required: false },
+  { variable: '{{branche}}',         description: 'Branche-key (off-grid, inbouw, …)',               example: 'off-grid',                      required: false },
+  { variable: '{{branche_zin}}',     description: 'Branche-specifieke zin in body',                  example: "autonoom reizen, stroom…",      required: false },
+  { variable: '{{categorie_url}}',   description: 'Link naar categoriepagina',                       example: 'https://…/campers-vans/off-grid', required: false },
+  { variable: '{{ps_offgrid}}',      description: 'PS-blok (alleen voor off-grid)',                  example: 'P.S. Specifiek voor off-grid…', required: false },
 ]
 
 /** Voorbeeldwaarden voor preview-rendering. */
