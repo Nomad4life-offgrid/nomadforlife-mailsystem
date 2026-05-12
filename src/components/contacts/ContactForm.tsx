@@ -5,6 +5,7 @@ import Link from 'next/link'
 import type { Contact } from '@/types'
 import type { ContactFormState } from '@/app/(admin)/contacts/actions'
 import { CONTACT_TYPES, CONTACT_SOURCES } from '@/lib/validations/contact'
+import { BRANCHES, BRANCHE_LABELS } from '@/lib/email/branche-data'
 
 const TYPE_LABELS: Record<string, string> = {
   camping:      'Camping',
@@ -149,6 +150,26 @@ export function ContactForm({ action, defaultValues, cancelHref = '/contacts' }:
             ))}
           </select>
           <FieldError errors={errors} field="contact_type" />
+        </div>
+
+        {/* Branche (outreach) */}
+        <div>
+          <label className="block text-sm font-medium text-zinc-700" htmlFor="branche">
+            Branche (outreach)
+            <span className="ml-2 font-normal text-xs text-zinc-400">vult merge-velden: branche_zin, onderwerp, categorie_url, ps_offgrid</span>
+          </label>
+          <select
+            id="branche"
+            name="branche"
+            defaultValue={(d.custom_fields as { branche?: string } | undefined)?.branche ?? ''}
+            className={inputCls(!!errors?.branche)}
+          >
+            <option value="">— Geen branche (geen merge-velden) —</option>
+            {BRANCHES.map((b) => (
+              <option key={b} value={b}>{BRANCHE_LABELS[b]}</option>
+            ))}
+          </select>
+          <FieldError errors={errors} field="branche" />
         </div>
       </div>
 

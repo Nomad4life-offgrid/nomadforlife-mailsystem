@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { BRANCHES } from '@/lib/email/branche-data'
 
 export const CONTACT_TYPES = ['camping','sponsor','adverteerder','lid','partner','prospect','overig'] as const
 export const CONTACT_SOURCES = ['manual','import','api','website','admin'] as const
@@ -13,6 +14,7 @@ export const ContactSchema = z.object({
   source:       z.enum(CONTACT_SOURCES).default('admin'),
   notes:        z.string().max(5000).nullish(),
   tags:         z.array(z.string()).default([]),
+  branche:      z.enum(BRANCHES).nullish(),
 })
 
 export const UpdateContactSchema = ContactSchema.partial().extend({

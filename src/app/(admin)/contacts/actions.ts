@@ -7,6 +7,7 @@ import { createServiceClient } from '@/lib/supabase/service'
 import { ContactSchema, UpdateContactSchema } from '@/lib/validations/contact'
 import { logConsent } from '@/lib/consent/log'
 import { requireAdmin, requireEditor } from '@/lib/auth/guards'
+import { customFieldsForBranche, isBranche } from '@/lib/email/branche-data'
 
 // ── Import result type ────────────────────────────────────────────────────────
 
@@ -38,6 +39,7 @@ function parseFormToObject(formData: FormData) {
     contact_type: formData.get('contact_type') || null,
     source:       formData.get('source')     || 'admin',
     notes:        formData.get('notes')      || null,
+    branche:      formData.get('branche')    || null,
   }
 }
 
@@ -58,9 +60,11 @@ export async function createContact(
     return { errors: parsed.error.flatten().fieldErrors }
   }
 
-  const { email, first_name, last_name, company, phone, contact_type, source, notes } = parsed.data
+  const { email, first_name, last_name, company, phone, contact_type, source, notes, branche } = parsed.data
   const supabase = createServiceClient()
   const now      = new Date().toISOString()
+
+  const customFields = isBranche(branche) ? customFieldsForBranche(branche, company ?? email) : {}
 
   const { data: newContact, error } = await supabase
     .from('contacts')
@@ -73,6 +77,7 @@ export async function createContact(
       contact_type,
       source,
       notes,
+      custom_fields: customFields,
       opted_in:    true,
       opted_in_at: now,
       status:      'active',
@@ -119,12 +124,28 @@ export async function updateContact(
     return { errors: parsed.error.flatten().fieldErrors }
   }
 
-  const { email, first_name, last_name, company, phone, contact_type, source, notes } = parsed.data
+  const { email, first_name, last_name, company, phone, contact_type, source, notes, branche } = parsed.data
   const supabase = createServiceClient()
+
+  // Bij wijziging van branche: bestaande custom_fields ophalen en alleen de
+  // branche-velden overschrijven (laat onbekende keys staan).
+  let customFieldsUpdate: Record<string, unknown> | undefined
+  if (isBranche(branche)) {
+    const { data: cur } = await supabase
+      .from('contacts')
+      .select('custom_fields, company')
+      .eq('id', id)
+      .single()
+    const bedrijfsnaam = company ?? cur?.company ?? email ?? ''
+    customFieldsUpdate = { ...(cur?.custom_fields ?? {}), ...customFieldsForBranche(branche, bedrijfsnaam) }
+  }
+
+  const update: Record<string, unknown> = { email, first_name, last_name, company, phone, contact_type, source, notes }
+  if (customFieldsUpdate) update.custom_fields = customFieldsUpdate
 
   const { error } = await supabase
     .from('contacts')
-    .update({ email, first_name, last_name, company, phone, contact_type, source, notes })
+    .update(update)
     .eq('id', id)
     .is('deleted_at', null)
 
