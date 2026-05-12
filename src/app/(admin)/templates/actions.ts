@@ -101,14 +101,35 @@ export async function deleteTemplate(id: string) {
   await requireAdmin()
   const supabase = createServiceClient()
 
-  // Ontkoppel eerst campaign_steps die naar deze template verwijzen
-  const { error: unlinkErr } = await supabase
+  // campaign_steps.template_id is NOT NULL + ON DELETE RESTRICT, dus we kunnen
+  // een template niet verwijderen zolang een funnel-stap ernaar verwijst.
+  // Toon een nette foutmelding ipv een 500.
+  const { data: usedSteps, error: stepErr } = await supabase
     .from('campaign_steps')
-    .update({ template_id: null })
+    .select('campaign_id, campaigns(name)')
     .eq('template_id', id)
-  if (unlinkErr) throw new Error(unlinkErr.message)
+    .limit(3)
+
+  if (stepErr) {
+    redirect(`/templates?error=${encodeURIComponent('Kon template-gebruik niet controleren: ' + stepErr.message)}`)
+  }
+
+  if (usedSteps && usedSteps.length > 0) {
+    const names = Array.from(
+      new Set(
+        usedSteps
+          .map((s) => (s.campaigns as unknown as { name?: string } | null)?.name)
+          .filter(Boolean) as string[],
+      ),
+    )
+    const detail = names.length > 0 ? ` (${names.join(', ')}${usedSteps.length >= 3 ? ', …' : ''})` : ''
+    redirect(`/templates?error=${encodeURIComponent(`Deze template wordt nog gebruikt in een campagne${detail}. Verwijder of wijzig die stap eerst.`)}`)
+  }
 
   const { error } = await supabase.from('templates').delete().eq('id', id)
-  if (error) throw new Error(error.message)
+  if (error) {
+    redirect(`/templates?error=${encodeURIComponent('Verwijderen mislukt: ' + error.message)}`)
+  }
   revalidatePath('/templates')
+  redirect('/templates')
 }
