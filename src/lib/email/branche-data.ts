@@ -79,6 +79,68 @@ export function customFieldsForBranche(
   }
 }
 
+// ── Override-loader (DB) ──────────────────────────────────────────────────────
+
+export type BrancheTextRow = {
+  branche:  Branche
+  zin:      string
+  subject:  string
+  url_slug: string
+  ps_block: string
+}
+
+type SupaLike = {
+  from: (table: string) => {
+    select: (cols: string) => Promise<{ data: BrancheTextRow[] | null; error: unknown }>
+  }
+}
+
+/**
+ * Laadt branche-overrides uit de DB (tabel `branche_texts`).
+ * Faalt stilletjes wanneer de tabel nog niet bestaat — fallback op hardcoded defaults.
+ */
+export async function loadBrancheTexts(
+  supabase: SupaLike,
+): Promise<Partial<Record<Branche, BrancheTextRow>>> {
+  try {
+    const { data } = await supabase.from('branche_texts').select('branche, zin, subject, url_slug, ps_block')
+    if (!data) return {}
+    const out: Partial<Record<Branche, BrancheTextRow>> = {}
+    for (const row of data) {
+      if (BRANCHES.includes(row.branche)) out[row.branche] = row
+    }
+    return out
+  } catch {
+    return {}
+  }
+}
+
+/**
+ * Variant van customFieldsForBranche die DB-overrides gebruikt waar aanwezig.
+ */
+export function customFieldsFromTexts(
+  branche: Branche,
+  bedrijfsnaam: string,
+  texts: Partial<Record<Branche, BrancheTextRow>>,
+): Record<string, string | boolean> {
+  const t = texts[branche]
+  const zin     = t?.zin      ?? BRANCHE_ZIN[branche]
+  const subject = t?.subject  ?? BRANCHE_SUBJECT[branche]
+  const slug    = t?.url_slug ?? URL_SLUG[branche]
+  const psBlock = t?.ps_block ?? (branche === 'off-grid' ? PS_OFFGRID : '')
+
+  return {
+    aanhef:        `Hallo ${bedrijfsnaam},`,
+    bedrijfsnaam,
+    branche,
+    branche_zin:   zin,
+    onderwerp:     subject,
+    categorie_url: `https://www.nomad4life.com/campers-vans/${slug}`,
+    ps_offgrid:    psBlock,
+    is_multi:      branche === 'multi',
+  }
+}
+
 export function isBranche(v: unknown): v is Branche {
   return typeof v === 'string' && (BRANCHES as readonly string[]).includes(v)
 }

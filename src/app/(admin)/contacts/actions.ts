@@ -7,7 +7,7 @@ import { createServiceClient } from '@/lib/supabase/service'
 import { ContactSchema, UpdateContactSchema } from '@/lib/validations/contact'
 import { logConsent } from '@/lib/consent/log'
 import { requireAdmin, requireEditor } from '@/lib/auth/guards'
-import { customFieldsForBranche, isBranche } from '@/lib/email/branche-data'
+import { customFieldsFromTexts, isBranche, loadBrancheTexts } from '@/lib/email/branche-data'
 
 // ── Import result type ────────────────────────────────────────────────────────
 
@@ -64,7 +64,8 @@ export async function createContact(
   const supabase = createServiceClient()
   const now      = new Date().toISOString()
 
-  const customFields = isBranche(branche) ? customFieldsForBranche(branche, company ?? email) : {}
+  const texts = isBranche(branche) ? await loadBrancheTexts(supabase) : {}
+  const customFields = isBranche(branche) ? customFieldsFromTexts(branche, company ?? email, texts) : {}
 
   const { data: newContact, error } = await supabase
     .from('contacts')
@@ -137,7 +138,8 @@ export async function updateContact(
       .eq('id', id)
       .single()
     const bedrijfsnaam = company ?? cur?.company ?? email ?? ''
-    customFieldsUpdate = { ...(cur?.custom_fields ?? {}), ...customFieldsForBranche(branche, bedrijfsnaam) }
+    const texts = await loadBrancheTexts(supabase)
+    customFieldsUpdate = { ...(cur?.custom_fields ?? {}), ...customFieldsFromTexts(branche, bedrijfsnaam, texts) }
   }
 
   const update: Record<string, unknown> = { email, first_name, last_name, company, phone, contact_type, source, notes }

@@ -84,6 +84,21 @@ export default async function SettingsPage() {
         </section>
 
         <section>
+          <h2 className="text-base font-medium text-zinc-900 mb-3">Branche-teksten</h2>
+          <div className="rounded-lg border border-zinc-200 bg-white p-4 flex items-center justify-between gap-3">
+            <p className="text-sm text-zinc-600">
+              Beheer de merge-teksten per branche (off-grid, inbouw, …) die in de Founding Partners outreach worden ingevuld.
+            </p>
+            <Link
+              href="/settings/branche-texts"
+              className="shrink-0 rounded-md border border-zinc-300 px-3 py-1.5 text-sm font-medium text-zinc-700 hover:bg-zinc-50 transition-colors"
+            >
+              Openen →
+            </Link>
+          </div>
+        </section>
+
+        <section>
           <h2 className="text-base font-medium text-zinc-900 mb-3">Testmail versturen</h2>
           <div className="rounded-lg border border-zinc-200 bg-white p-4">
             {(!templates || templates.length === 0) ? (
