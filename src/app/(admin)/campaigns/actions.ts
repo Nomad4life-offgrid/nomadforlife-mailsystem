@@ -313,10 +313,10 @@ export async function sendCampaign(id: string) {
     redirect(`/campaigns/${id}?error=${msg}`)
   }
 
+  // "Nu versturen" betekent NU — negeer planned_send_at. Wie wil inplannen,
+  // gebruikt een aparte schedule-actie (nog niet aanwezig in UI).
   const now         = new Date()
-  const scheduledAt = campaign.planned_send_at
-    ? new Date(campaign.planned_send_at).toISOString()
-    : now.toISOString()
+  const scheduledAt = now.toISOString()
 
   // 4. Campaign_runs + mail_logs aanmaken
   let successCount = 0
