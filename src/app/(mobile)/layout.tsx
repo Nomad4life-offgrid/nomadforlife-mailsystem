@@ -11,9 +11,11 @@ export default async function MobileLayout({ children }: { children: React.React
 
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect(`/login?next=${next}`)
+  if (!user) {
+    redirect(`/login?next=${next}`)
+  }
 
-  const role = await getUserRole(user.id)
+  const role = await getUserRole(user!.id)
   if (!role) {
     redirect(`/login?next=${next}&error=no_access`)
   }
