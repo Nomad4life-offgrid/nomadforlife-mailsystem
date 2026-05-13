@@ -21,6 +21,8 @@ export type MailPayload = {
   unsubscribe_url:      string
   /** URL voor RFC 8058 one-click POST */
   unsubscribe_post_url: string
+  /** Optionele CC-ontvangers */
+  cc?: string[]
 }
 
 export function buildMailPayload(opts: {

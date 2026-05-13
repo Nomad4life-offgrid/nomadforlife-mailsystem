@@ -12,11 +12,13 @@ import {
 } from '@/lib/email/branche-data'
 import { sendgrid, app } from '@/lib/config'
 
-const TEMPLATE_NAME = 'Founding Partners 1'
-const GROUP_NAME    = 'Founding Partners'
+const TEMPLATE_NAME       = 'Founding Partners 1'
+const GROUP_NAME          = 'Founding Partners'
+const CC_FIRST_N_ADHOC    = 5
+const CC_INTERNAL_ADDRESS = 'hello@nomad4life.com'
 
 export type QuickSendResult =
-  | { ok: true; contactId: string; email: string; bedrijfsnaam: string; branche: Branche }
+  | { ok: true; contactId: string; email: string; bedrijfsnaam: string; branche: Branche; ccTo: string | null }
   | { ok: false; error: string }
 
 /**
@@ -97,6 +99,16 @@ export async function quicksendNow(formData: FormData): Promise<QuickSendResult>
   const unsubscribeUrl     = `${app.url}/unsubscribe/${unsubRow.token}`
   const unsubscribePostUrl = `${app.url}/api/unsubscribe/${unsubRow.token}`
 
+  // ── Tellen hoeveel ad-hoc sends er al zijn gedaan; eerste N krijgen CC ────
+  // Eenvoudige seq op basis van contacten met custom_fields.via_quicksend=true.
+  const { count: adhocCount } = await supabase
+    .from('contacts')
+    .select('id', { count: 'exact', head: true })
+    .filter('custom_fields->>via_quicksend', 'eq', 'true')
+
+  const includeCc = (adhocCount ?? 0) < CC_FIRST_N_ADHOC
+  const ccTo = includeCc ? CC_INTERNAL_ADDRESS : null
+
   // ── Payload bouwen + versturen ────────────────────────────────────────────
   const payload = buildMailPayload({
     contact: { email, first_name: null, last_name: null, custom_fields: customFields },
@@ -107,10 +119,16 @@ export async function quicksendNow(formData: FormData): Promise<QuickSendResult>
     unsubscribePostUrl,
   })
 
-  const result = await sendEmail(payload)
+  const result = await sendEmail({ ...payload, cc: ccTo ? [ccTo] : undefined })
   if (!result.ok) return { ok: false, error: `Verzenden mislukt: ${result.error}` }
 
-  return { ok: true, contactId, email, bedrijfsnaam, branche }
+  // Markeer dit contact als 'via quicksend' zodat de teller klopt voor volgende sends.
+  await supabase
+    .from('contacts')
+    .update({ custom_fields: { ...customFields, via_quicksend: true } })
+    .eq('id', contactId)
+
+  return { ok: true, contactId, email, bedrijfsnaam, branche, ccTo }
 }
 
 export type QuickSaveResult = { ok: true } | { ok: false; error: string }

@@ -14,6 +14,8 @@ export type SendPayload = {
   unsubscribe_url: string
   /** URL for RFC 8058 one-click machine POST — points to /api/unsubscribe/[token] */
   unsubscribe_post_url: string
+  /** Optionele CC-ontvangers (intern, bv. eigen archief) */
+  cc?: string[]
 }
 
 export type SendResult =
@@ -24,6 +26,7 @@ export async function sendEmail(payload: SendPayload): Promise<SendResult> {
   try {
     const [response] = await sgMail.send({
       to: payload.to,
+      ...(payload.cc && payload.cc.length > 0 ? { cc: payload.cc } : {}),
       from: { email: payload.from_email, name: payload.from_name },
       subject: payload.subject,
       html: payload.html,

@@ -59,6 +59,9 @@ export function QuickSendForm() {
           <p className="mt-3 text-lg font-semibold text-green-800">Verzonden</p>
           <p className="mt-1 text-sm text-green-700">{last.email}</p>
           <p className="text-xs text-green-600 mt-0.5">{last.bedrijfsnaam} · {BRANCHE_LABELS[last.branche]}</p>
+          {last.ccTo && (
+            <p className="text-xs italic text-green-700 mt-2">cc: {last.ccTo}</p>
+          )}
         </div>
 
         <button
